@@ -56,4 +56,4 @@ The plugin talks to Google Calendar and Microsoft Graph directly from the user's
 | `NM_MS_CLIENT_ID` | Azure application (client) ID |
 | `NEXT_MEETING_MOCK=1` | Skip real providers entirely and serve the deterministic mock calendar — lets you exercise the full plugin on a device before any client is registered |
 
-For a release build, replace the `REPLACE_ME` values in `OAUTH_CONFIG` with the registered client IDs instead of relying on env vars (end users don't set environment variables for Stream Deck).
+For a release build, replace the `REPLACE_ME` values in `OAUTH_CONFIG` with the registered values instead of relying on env vars (end users don't set environment variables for Stream Deck). That includes the Google client secret: Google treats Desktop-app secrets as non-confidential, so embedding it in the shipped bundle is normal and required — keeping it env-injected here is hygiene for the public *source repo*, not a runtime rule.
