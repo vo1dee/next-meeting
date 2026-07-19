@@ -12,15 +12,20 @@
   "CodePath": "bin/plugin.js",
   "SDKVersion": 2,
   "Nodejs": {
-    "Version": "20",
-    "Debug": "enabled"
+    "Version": "20"
   },
   "Software": {
     "MinimumVersion": "6.5"
   },
   "OS": [
-    { "Platform": "mac", "MinimumVersion": "12" },
-    { "Platform": "windows", "MinimumVersion": "10" }
+    {
+      "Platform": "mac",
+      "MinimumVersion": "12"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
   ],
   "Actions": [
     {
@@ -29,11 +34,15 @@
       "Tooltip": "Shows time until your next meeting. Press to join.",
       "Icon": "imgs/actions/key/icon",
       "PropertyInspectorPath": "ui/pi.html",
-      "Controllers": ["Keypad"],
+      "Controllers": [
+        "Keypad"
+      ],
       "SupportedInMultiActions": false,
       "UserTitleEnabled": false,
       "States": [
-        { "Image": "imgs/actions/key/state" }
+        {
+          "Image": "imgs/actions/key/state"
+        }
       ]
     },
     {
@@ -42,7 +51,9 @@
       "Tooltip": "Rotate to scroll today's agenda. Press to join the selected meeting.",
       "Icon": "imgs/actions/dial/icon",
       "PropertyInspectorPath": "ui/pi.html",
-      "Controllers": ["Encoder"],
+      "Controllers": [
+        "Encoder"
+      ],
       "Encoder": {
         "layout": "$B1",
         "TriggerDescription": {
@@ -52,7 +63,9 @@
         }
       },
       "States": [
-        { "Image": "imgs/actions/dial/state" }
+        {
+          "Image": "imgs/actions/dial/state"
+        }
       ]
     }
   ]

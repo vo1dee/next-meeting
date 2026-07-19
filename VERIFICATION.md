@@ -75,8 +75,8 @@ Delivered 2026-07-19: `buildAgenda`/`dedupeByICalUid` in `src/core/next-meeting.
 
 ## Task 6 — Packaging & Marketplace submission
 
-- [ ] `Nodejs.Debug` removed/disabled in both manifests
-- [ ] `streamdeck validate` and `streamdeck pack` succeed for both SKUs
+- [x] `Nodejs.Debug` removed/disabled in both manifests (key dropped entirely, 2026-07-19)
+- [x] `streamdeck validate` and `streamdeck pack` succeed for both SKUs (2026-07-19; `.streamDeckPlugin` outputs are gitignored)
 - [ ] Placeholder SVGs replaced with final art (including Marketplace-required PNG sizes)
 - [ ] Fresh-machine install test of both `.streamDeckPlugin` files: connect account, see countdown, join a real meeting
 - [ ] Maker org created, Maker Agreement signed, Stripe Connect payout country confirmed (prerequisite for the paid listing — ADR-0003)
