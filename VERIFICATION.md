@@ -41,6 +41,8 @@ Runtime behavior (manual, `streamdeck link` + mock provider):
 
 ## Task 3 — Property Inspector
 
+Delivered 2026-07-19: sdpi-components v4 vendored into each SKU's `ui/` (PI works offline); account connect/disconnect routed through `pi-bridge.ts` at the UI-controller level so key and dial share one implementation; the free "Get Pro" button points at a vo1dee.com placeholder URL until the listing exists (T6). The boxes below are on-device acceptance checks — they need a machine with Stream Deck installed.
+
 - [ ] PI renders with Elgato's native look (sdpi components) in both SKUs
 - [ ] Refresh slider: range 1–15 min, default 5; persists to globalSettings and survives Stream Deck restart
 - [ ] Pre-meeting flash toggle: default on; persists

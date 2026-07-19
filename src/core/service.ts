@@ -23,11 +23,19 @@ export class NextMeetingService {
   constructor(private readonly provider: CalendarProvider) {}
 
   async start(): Promise<void> {
-    this.settings = withDefaults(await streamDeck.settings.getGlobalSettings<GlobalSettings>());
+    const stored: Partial<GlobalSettings> = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
+    this.settings = withDefaults(stored);
+    if (stored.refreshMinutes === undefined || stored.preMeetingFlash === undefined) {
+      // First run: persist defaults so the PI always binds to concrete values.
+      await streamDeck.settings.setGlobalSettings(this.settings);
+    }
     streamDeck.settings.onDidReceiveGlobalSettings<GlobalSettings>((ev) => {
       this.settings = withDefaults(ev.settings);
+      // Slider drags fire this repeatedly — reschedule the next poll instead
+      // of fetching immediately; account changes trigger their own poll (T4).
       clearTimeout(this.pollTimer);
-      void this.poll();
+      this.pollTimer = setTimeout(() => void this.poll(), this.settings.refreshMinutes * 60_000);
+      this.notify();
     });
     await this.poll();
     this.scheduleTick();

@@ -3,13 +3,72 @@
   <head>
     <meta charset="utf-8" />
     <title>Next Meeting Pro Settings</title>
+    <script src="sdpi-components.js"></script>
+    <style>
+      #account-list { color: #d8d8d8; font-size: 9pt; }
+      .account-row { display: flex; align-items: center; justify-content: space-between; padding: 2px 0; }
+      .account-row button { margin-left: 8px; }
+      #account-hint { color: #969696; font-size: 8pt; padding: 2px 0 6px; }
+    </style>
   </head>
   <body>
-    <!--
-      Task 3 builds this out: multi-account connect (Google/Microsoft, loopback
-      OAuth), refresh slider (1–15 min, default 5), pre-meeting flash toggle
-      (default on). All settings are plugin-global.
-    -->
-    <p>Settings arrive in Task 3.</p>
+    <sdpi-item label="Accounts">
+      <div id="account-list">No account connected</div>
+    </sdpi-item>
+    <sdpi-item>
+      <sdpi-button id="connect-google">Connect Google</sdpi-button>
+      <sdpi-button id="connect-microsoft">Connect Microsoft</sdpi-button>
+    </sdpi-item>
+    <sdpi-item>
+      <div id="account-hint"></div>
+    </sdpi-item>
+
+    <sdpi-item label="Refresh every (min)">
+      <sdpi-range setting="refreshMinutes" global min="1" max="15" step="1" default="5" showlabels></sdpi-range>
+    </sdpi-item>
+    <sdpi-item label="Pre-meeting alert">
+      <sdpi-checkbox setting="preMeetingFlash" global label="Flash from 2 minutes before"></sdpi-checkbox>
+    </sdpi-item>
+
+    <script>
+      const client = SDPIComponents.streamDeckClient;
+      const $ = (id) => document.getElementById(id);
+
+      function renderAccounts({ accounts, maxAccounts }) {
+        const list = $("account-list");
+        list.textContent = accounts.length ? "" : "No account connected";
+        for (const account of accounts) {
+          const row = document.createElement("div");
+          row.className = "account-row";
+          const label = document.createElement("span");
+          label.textContent = `${account.provider === "google" ? "Google" : "Microsoft"} — ${account.label}`;
+          const remove = document.createElement("button");
+          remove.textContent = "Disconnect";
+          remove.addEventListener("click", () =>
+            client.send("sendToPlugin", { event: "disconnectAccount", accountId: account.id }),
+          );
+          row.append(label, remove);
+          list.append(row);
+        }
+        const atLimit = accounts.length >= maxAccounts;
+        $("connect-google").toggleAttribute("disabled", atLimit);
+        $("connect-microsoft").toggleAttribute("disabled", atLimit);
+        $("account-hint").textContent = atLimit ? "Account limit reached." : "";
+      }
+
+      client.sendToPropertyInspector.subscribe((message) => {
+        const payload = message?.payload ?? message;
+        if (payload?.event === "accounts") renderAccounts(payload);
+      });
+
+      $("connect-google").addEventListener("click", () =>
+        client.send("sendToPlugin", { event: "connectAccount", provider: "google" }),
+      );
+      $("connect-microsoft").addEventListener("click", () =>
+        client.send("sendToPlugin", { event: "connectAccount", provider: "microsoft" }),
+      );
+
+      client.send("sendToPlugin", { event: "getAccounts" });
+    </script>
   </body>
 </html>
