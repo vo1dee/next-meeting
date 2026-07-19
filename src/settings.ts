@@ -1,3 +1,5 @@
+import type { TokenSet } from "./auth/token-store";
+
 /** A connected calendar account (display reference; tokens live in the TokenStore). */
 export type AccountRef = {
   id: string;
@@ -14,12 +16,15 @@ export type GlobalSettings = {
   preMeetingFlash: boolean;
   /** Connected accounts; the free SKU allows exactly one. */
   accounts: AccountRef[];
+  /** OAuth tokens keyed by account id (GlobalSettingsTokenStore backing). */
+  tokens: Record<string, TokenSet>;
 };
 
 export const DEFAULT_SETTINGS: GlobalSettings = {
   refreshMinutes: 5,
   preMeetingFlash: true,
   accounts: [],
+  tokens: {},
 };
 
 export function withDefaults(partial: Partial<GlobalSettings> | undefined): GlobalSettings {

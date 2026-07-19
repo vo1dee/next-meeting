@@ -1,26 +1,41 @@
 import streamDeck from "@elgato/streamdeck";
 
+import { AuthError } from "../auth/oauth";
 import type { CalendarEvent, CalendarProvider } from "../calendar/provider";
 import { DEFAULT_SETTINGS, withDefaults, type GlobalSettings } from "../settings";
 import { extractJoinLink } from "./join-link";
 import { computeKeyFace, type KeyFace } from "./keyface-state";
-import { selectNextMeeting } from "./next-meeting";
+import { buildAgenda, dedupeByICalUid, selectNextMeeting } from "./next-meeting";
+
+export type ProvidersSource = () => Promise<CalendarProvider[]>;
+
+export type PressAction =
+  | { kind: "open"; url: string }
+  | { kind: "reauth"; accountIds: string[] }
+  | { kind: "alert" };
+
+/** After this long without a successful poll the face gets a stale marker. */
+const STALE_AFTER_MS = 30 * 60_000;
 
 /**
  * Owns the calendar cache and the two clocks: the API poll (refreshMinutes)
  * and the display tick (minute boundaries, or 1 Hz while a flash state is
- * active). Actions subscribe via onChange and pull face()/pressUrl().
+ * active). Actions subscribe via onChange and pull face()/agenda()/press
+ * decisions from here.
  */
 export class NextMeetingService {
   private events: CalendarEvent[] = [];
+  private providers: CalendarProvider[] = [];
   private settings: GlobalSettings = DEFAULT_SETTINGS;
+  private failedAccounts = new Set<string>();
   private authFailed = false;
+  private lastPollOk = 0;
   private flashPhase = false;
   private pollTimer?: NodeJS.Timeout;
   private tickTimer?: NodeJS.Timeout;
   private readonly listeners = new Set<() => void>();
 
-  constructor(private readonly provider: CalendarProvider) {}
+  constructor(private readonly providersSource: ProvidersSource) {}
 
   async start(): Promise<void> {
     const stored: Partial<GlobalSettings> = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
@@ -32,7 +47,7 @@ export class NextMeetingService {
     streamDeck.settings.onDidReceiveGlobalSettings<GlobalSettings>((ev) => {
       this.settings = withDefaults(ev.settings);
       // Slider drags fire this repeatedly — reschedule the next poll instead
-      // of fetching immediately; account changes trigger their own poll (T4).
+      // of fetching immediately; account changes call refreshNow() explicitly.
       clearTimeout(this.pollTimer);
       this.pollTimer = setTimeout(() => void this.poll(), this.settings.refreshMinutes * 60_000);
       this.notify();
@@ -47,40 +62,78 @@ export class NextMeetingService {
     this.listeners.clear();
   }
 
+  /** Immediate re-poll — used after connecting, re-authorizing, or removing accounts. */
+  async refreshNow(): Promise<void> {
+    clearTimeout(this.pollTimer);
+    await this.poll();
+  }
+
   onChange(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   }
 
-  face(): { face: KeyFace; flashPhase: boolean } {
-    const face: KeyFace = this.authFailed
-      ? { kind: "auth" }
-      : computeKeyFace(this.nextMeeting(), new Date(), this.settings.preMeetingFlash);
-    return { face, flashPhase: this.flashPhase };
+  face(): { face: KeyFace; flashPhase: boolean; stale: boolean } {
+    const face: KeyFace =
+      this.authFailed || this.providers.length === 0
+        ? { kind: "auth" }
+        : computeKeyFace(this.nextMeeting(), new Date(), this.settings.preMeetingFlash);
+    const stale =
+      face.kind !== "auth" && this.lastPollOk > 0 && Date.now() - this.lastPollOk > STALE_AFTER_MS;
+    return { face, flashPhase: this.flashPhase, stale };
   }
 
   nextMeeting(): CalendarEvent | undefined {
     return selectNextMeeting(this.events, new Date());
   }
 
-  /**
-   * The URL a press opens: Join Link → event page → day view when Clear.
-   * TODO(T4): the Auth state re-triggers the OAuth flow instead.
-   */
-  pressUrl(): string {
-    const next = this.authFailed ? undefined : this.nextMeeting();
-    if (!next) return this.provider.dayViewUrl(new Date());
-    return extractJoinLink(next) ?? next.webLink;
+  /** Today's remaining Candidate Events for the Pro dial. */
+  agenda(): CalendarEvent[] {
+    return buildAgenda(this.events, new Date());
+  }
+
+  /** Join URL for one agenda entry — the key's exact press semantics. */
+  joinUrl(event: CalendarEvent): string {
+    return extractJoinLink(event) ?? event.webLink;
+  }
+
+  /** What a press should do right now (agreed press semantics). */
+  pressAction(): PressAction {
+    if (this.authFailed && this.failedAccounts.size > 0) {
+      return { kind: "reauth", accountIds: [...this.failedAccounts] };
+    }
+    if (this.providers.length === 0) return { kind: "alert" }; // no accounts: connect via the PI first
+    const next = this.nextMeeting();
+    if (next) return { kind: "open", url: this.joinUrl(next) };
+    return { kind: "open", url: this.providers[0].dayViewUrl(new Date()) };
   }
 
   private async poll(): Promise<void> {
     try {
-      this.events = await this.provider.listDay(new Date());
+      this.providers = await this.providersSource();
+      const results = await Promise.allSettled(this.providers.map((p) => p.listDay(new Date())));
       this.authFailed = false;
+      this.failedAccounts.clear();
+      let allOk = true;
+      for (const result of results) {
+        if (result.status === "rejected") {
+          allOk = false;
+          if (result.reason instanceof AuthError) {
+            this.authFailed = true;
+            if (result.reason.accountId) this.failedAccounts.add(result.reason.accountId);
+          } else {
+            // Agreed failure mode: keep serving the cached agenda — local time
+            // math stays valid; the face gains a stale marker after 30 min.
+            streamDeck.logger.warn("Calendar fetch failed; serving cached events", result.reason);
+          }
+        }
+      }
+      if (allOk) {
+        this.events = dedupeByICalUid(results.flatMap((r) => (r.status === "fulfilled" ? r.value : [])));
+        this.lastPollOk = Date.now();
+      }
     } catch (err) {
-      // Agreed failure mode: keep serving the cached agenda — local time math
-      // stays valid. TODO(T4): set authFailed on auth errors specifically.
-      streamDeck.logger.warn("Calendar fetch failed; serving cached events", err);
+      streamDeck.logger.error("Poll failed", err);
     }
     this.pollTimer = setTimeout(() => void this.poll(), this.settings.refreshMinutes * 60_000);
     this.notify();

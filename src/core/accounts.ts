@@ -1,5 +1,7 @@
 import streamDeck from "@elgato/streamdeck";
 
+import { tokenStore } from "../auth/context";
+import { runOAuthFlow } from "../auth/oauth";
 import { withDefaults, type AccountRef, type GlobalSettings } from "../settings";
 import { isProUser } from "../tier";
 
@@ -10,22 +12,62 @@ export function maxAccounts(): number {
   return isProUser() ? 8 : 1;
 }
 
-export async function getAccounts(): Promise<AccountRef[]> {
-  return withDefaults(await streamDeck.settings.getGlobalSettings<GlobalSettings>()).accounts;
+async function readSettings(): Promise<GlobalSettings> {
+  return withDefaults(await streamDeck.settings.getGlobalSettings<GlobalSettings>());
 }
 
-/** TODO(T4): launch the loopback+PKCE OAuth flow (ADR-0001) and persist the account + tokens. */
-export async function connectAccount(provider: ProviderKind): Promise<void> {
+export async function getAccounts(): Promise<AccountRef[]> {
+  return (await readSettings()).accounts;
+}
+
+/** Interactive loopback+PKCE flow (ADR-0001); persists the account and its tokens. */
+export async function connectAccount(provider: ProviderKind): Promise<boolean> {
   if ((await getAccounts()).length >= maxAccounts()) {
     streamDeck.logger.info("Account limit reached for this tier; connect refused");
-    return;
+    return false;
   }
-  streamDeck.logger.info(`Connect ${provider} requested — OAuth flow lands in T4`);
+  try {
+    const result = await runOAuthFlow(provider);
+    await tokenStore.set(result.accountId, result.tokens);
+    const settings = await readSettings();
+    if (!settings.accounts.some((account) => account.id === result.accountId)) {
+      settings.accounts.push({ id: result.accountId, provider, label: result.label });
+      await streamDeck.settings.setGlobalSettings(settings);
+    }
+    return true;
+  } catch (err) {
+    streamDeck.logger.error(`Connecting ${provider} failed`, err);
+    return false;
+  }
 }
 
-/** TODO(T4): also revoke and delete the account's tokens from the TokenStore. */
+/** Re-run consent for accounts whose refresh tokens died (press-on-Auth semantics). */
+export async function reauthorizeAccounts(accountIds: string[]): Promise<boolean> {
+  const settings = await readSettings();
+  let anySuccess = false;
+  for (const accountId of accountIds) {
+    const account = settings.accounts.find((a) => a.id === accountId);
+    if (!account) continue;
+    try {
+      const result = await runOAuthFlow(account.provider);
+      await tokenStore.set(result.accountId, result.tokens);
+      if (result.accountId !== account.id) {
+        await tokenStore.delete(account.id);
+        account.id = result.accountId;
+      }
+      account.label = result.label;
+      anySuccess = true;
+    } catch (err) {
+      streamDeck.logger.error(`Re-authorizing ${account.label} failed`, err);
+    }
+  }
+  if (anySuccess) await streamDeck.settings.setGlobalSettings(settings);
+  return anySuccess;
+}
+
 export async function disconnectAccount(accountId: string): Promise<void> {
-  const settings = withDefaults(await streamDeck.settings.getGlobalSettings<GlobalSettings>());
+  await tokenStore.delete(accountId);
+  const settings = await readSettings();
   settings.accounts = settings.accounts.filter((account) => account.id !== accountId);
   await streamDeck.settings.setGlobalSettings(settings);
 }

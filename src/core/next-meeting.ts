@@ -34,10 +34,27 @@ export function selectNextMeeting(events: CalendarEvent[], now: Date): CalendarE
   return best;
 }
 
+/** Blended Pro calendars can carry the same meeting twice — keep the first sighting. */
+export function dedupeByICalUid(events: CalendarEvent[]): CalendarEvent[] {
+  const seen = new Set<string>();
+  const out: CalendarEvent[] = [];
+  for (const event of events) {
+    const key = event.iCalUid || `${event.accountId}:${event.id}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push(event);
+    }
+  }
+  return out;
+}
+
 /**
- * The Agenda (Pro dial): today's Candidate Events that have not ended, in
- * start order, deduped across accounts by iCalUid.
+ * The Agenda (Pro dial): today's Candidate Events, in start order, deduped
+ * across accounts by iCalUid. Same eligibility rules as the key (CONTEXT.md),
+ * so agenda[0] is always the Next Meeting.
  */
 export function buildAgenda(events: CalendarEvent[], now: Date): CalendarEvent[] {
-  throw new Error("TODO(T5)");
+  return dedupeByICalUid(events.filter((event) => isCandidate(event, now))).sort(
+    (a, b) => a.start.getTime() - b.start.getTime(),
+  );
 }

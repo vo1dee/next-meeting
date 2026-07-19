@@ -53,20 +53,24 @@ Delivered 2026-07-19: sdpi-components v4 vendored into each SKU's `ui/` (PI work
 
 ## Task 4 — OAuth & real calendar providers
 
+Delivered 2026-07-19: loopback+PKCE OAuth per ADR-0001 (`src/auth/`) with silent refresh and one 401-retry; Google and Microsoft Graph providers (`src/calendar/`) both mapping to the normalized `CalendarEvent`; tokens persisted in globalSettings via `GlobalSettingsTokenStore`. Only read-only scopes are configured (`calendar.readonly`, `Calendars.Read`); the Microsoft client is public (no secret in the repo — Google's "desktop app" secret is non-confidential by Google's own definition and is env-injected, never committed). **OAuth client registration is external work**: `OAUTH_CONFIG` ships `REPLACE_ME` client IDs with env overrides (`NM_GOOGLE_CLIENT_ID`/`NM_GOOGLE_CLIENT_SECRET`/`NM_MS_CLIENT_ID`); `NEXT_MEETING_MOCK=1` swaps in the mock provider so on-device testing works before clients exist. The unticked boxes below need registered clients plus a machine with Stream Deck.
+
 - [ ] Google: loopback+PKCE flow completes from a cold start; only read-only scopes requested (`calendar.readonly`)
 - [ ] Microsoft: same with `Calendars.Read`; public client, no secret anywhere in the repo
 - [ ] Tokens persist via TokenStore in globalSettings; access-token refresh works silently
 - [ ] Revoking access at the provider → key face shows "Auth" (no crash, no error loop); press restarts OAuth from the key
 - [ ] Fetch failure keeps serving the cached agenda; stale indicator appears after ~30 min of failures
-- [ ] Free build: connecting a second account is impossible by construction (single-account code path)
+- [x] Free build: connecting a second account is impossible by construction (single-account code path — `maxAccounts()` is 1 unless `isProUser()`, checked in `connectAccount`; 2026-07-19)
 - [ ] Privacy policy page live on vo1dee.com; Google verification submitted (release blocker for public listing, not for code review)
 
 ## Task 5 — Pro build (dial + multi-account)
 
-- [ ] Dial strip shows time • title • countdown for the selection; rotate moves through the Agenda (same eligibility as the key — verified by a shared-fixture test)
+Delivered 2026-07-19: `buildAgenda`/`dedupeByICalUid` in `src/core/next-meeting.ts` (unit-tested in `src/core/agenda.test.ts`), agenda dial rotate/clamp with 30 s snap-back and `$B1` feedback in `src/actions/agenda-dial.ts`. On-device boxes remain open.
+
+- [x] Dial strip shows time • title • countdown for the selection; rotate moves through the Agenda (same eligibility as the key — verified by a shared-fixture test: agenda[0] === Next Meeting, 2026-07-19; strip rendering itself is an on-device check)
 - [ ] Press and touch-tap join the selected event with the key's exact press semantics
 - [ ] 30s idle → selection snaps back to the Next Meeting; empty Agenda → Clear on the strip
-- [ ] Two accounts blended in start order; the same event on both accounts (same iCalUid) appears once
+- [x] Two accounts blended in start order; the same event on both accounts (same iCalUid) appears once (unit-tested: start-order sort + cross-account iCalUid dedupe, 2026-07-19)
 - [ ] Free bundle diff check: free build registers no dial action and contains no dial/multi-account UI
 
 ## Task 6 — Packaging & Marketplace submission

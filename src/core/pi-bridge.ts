@@ -1,6 +1,7 @@
 import streamDeck from "@elgato/streamdeck";
 
 import { connectAccount, disconnectAccount, getAccounts, maxAccounts } from "./accounts";
+import type { NextMeetingService } from "./service";
 
 type PiMessage = { event?: string; provider?: string; accountId?: string };
 
@@ -18,7 +19,7 @@ async function pushAccounts(): Promise<void> {
  * Slider/toggle persistence needs no routing — sdpi-components write those
  * straight to globalSettings.
  */
-export function connectPiBridge(): void {
+export function connectPiBridge(service: NextMeetingService): void {
   streamDeck.ui.onDidAppear(() => void pushAccounts());
   streamDeck.ui.onSendToPlugin((ev) => {
     const message = (typeof ev.payload === "object" && ev.payload !== null ? ev.payload : {}) as PiMessage;
@@ -28,11 +29,14 @@ export function connectPiBridge(): void {
           break;
         case "connectAccount":
           if (message.provider === "google" || message.provider === "microsoft") {
-            await connectAccount(message.provider);
+            if (await connectAccount(message.provider)) await service.refreshNow();
           }
           break;
         case "disconnectAccount":
-          if (message.accountId) await disconnectAccount(message.accountId);
+          if (message.accountId) {
+            await disconnectAccount(message.accountId);
+            await service.refreshNow();
+          }
           break;
         default:
           return;

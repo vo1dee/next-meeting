@@ -20,13 +20,14 @@ function fontSize(text: string): number {
   return 44;
 }
 
-function svg(style: Style, text: string): string {
+function svg(style: Style, text: string, stale: boolean): string {
   const markup =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
     `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
     `<text x="50%" y="53%" text-anchor="middle" dominant-baseline="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
     `font-size="${fontSize(text)}" fill="${style.fg}">${text}</text>` +
+    (stale ? `<circle cx="${SIZE - 16}" cy="16" r="7" fill="#9aa1ad" opacity="0.8"/>` : "") +
     `</svg>`;
   return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;
 }
@@ -34,19 +35,20 @@ function svg(style: Style, text: string): string {
 /**
  * Render a KeyFace as an SVG data URI for setImage(). Flashing is the
  * caller's clock: it alternates `flashPhase` at 1 Hz and re-renders; the
- * bright frame is used when the face flashes and the phase is on.
+ * bright frame is used when the face flashes and the phase is on. `stale`
+ * adds a small grey dot (calendar data older than the stale threshold).
  */
-export function renderKeyFace(face: KeyFace, flashPhase = false): string {
+export function renderKeyFace(face: KeyFace, flashPhase = false, stale = false): string {
   switch (face.kind) {
     case "countdown": {
       const style = face.flash && flashPhase ? STYLES.flash : STYLES[face.urgency];
-      return svg(style, face.text);
+      return svg(style, face.text, stale);
     }
     case "now":
-      return svg(face.flash && flashPhase ? STYLES.flash : STYLES.imminent, "NOW");
+      return svg(face.flash && flashPhase ? STYLES.flash : STYLES.imminent, "NOW", stale);
     case "clear":
-      return svg(STYLES.clear, "—");
+      return svg(STYLES.clear, "—", stale);
     case "auth":
-      return svg(STYLES.auth, "Auth");
+      return svg(STYLES.auth, "Auth", false);
   }
 }
