@@ -1,21 +1,40 @@
-import { action, KeyDownEvent, SingletonAction, WillAppearEvent, WillDisappearEvent } from "@elgato/streamdeck";
+import streamDeck, { action, KeyDownEvent, SingletonAction, WillAppearEvent } from "@elgato/streamdeck";
+
+import type { NextMeetingService } from "../core/service";
+import { renderKeyFace } from "../render/keyface";
 
 /**
  * The key face: countdown ladder + one-tap join. Press semantics (agreed):
- * Join Link → event page → day view when Clear → re-auth when Auth.
+ * Join Link → event page → day view when Clear → re-auth when Auth (T4).
  */
 @action({ UUID: `${__PLUGIN_UUID__}.key` })
 export class NextMeetingKey extends SingletonAction {
-  override async onWillAppear(ev: WillAppearEvent): Promise<void> {
-    // TODO(T2): start the render loop (minute tick; 1 Hz only while flashing).
+  private unsubscribe?: () => void;
+
+  constructor(private readonly service: NextMeetingService) {
+    super();
   }
 
-  override async onWillDisappear(ev: WillDisappearEvent): Promise<void> {
-    // TODO(T2): stop the render loop when no instances remain visible.
+  override onWillAppear(_ev: WillAppearEvent): void {
+    this.unsubscribe ??= this.service.onChange(() => void this.render());
+    void this.render();
   }
 
   override async onKeyDown(ev: KeyDownEvent): Promise<void> {
-    // TODO(T2): press semantics; TODO(T2): empty onJoined() hook seam
-    // (auto-mute deferred past v1.0 — see grilling decision).
+    await streamDeck.system.openUrl(this.service.pressUrl());
+    await ev.action.showOk();
+    this.onJoined();
+  }
+
+  /** Post-join hook — auto-mute (deferred past v1.0) slots in here. */
+  protected onJoined(): void {}
+
+  /** Renders the current face onto every visible instance of this action. */
+  private async render(): Promise<void> {
+    const { face, flashPhase } = this.service.face();
+    const image = renderKeyFace(face, flashPhase);
+    for (const instance of this.actions) {
+      await instance.setImage(image);
+    }
   }
 }
