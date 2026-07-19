@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "UUID": "com.vo1dee.next-meeting",
+  "Name": "Next Meeting",
+  "Version": "0.1.0.0",
+  "Author": "vo1dee",
+  "Description": "Glance at the time until your next meeting and join it with one tap. Connects to Google Calendar or Outlook.",
+  "URL": "https://vo1dee.com",
+  "Icon": "imgs/plugin/icon",
+  "Category": "Next Meeting",
+  "CategoryIcon": "imgs/plugin/category-icon",
+  "CodePath": "bin/plugin.js",
+  "SDKVersion": 2,
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "Software": {
+    "MinimumVersion": "6.5"
+  },
+  "OS": [
+    { "Platform": "mac", "MinimumVersion": "12" },
+    { "Platform": "windows", "MinimumVersion": "10" }
+  ],
+  "Actions": [
+    {
+      "UUID": "com.vo1dee.next-meeting.key",
+      "Name": "Next Meeting",
+      "Tooltip": "Shows time until your next meeting. Press to join.",
+      "Icon": "imgs/actions/key/icon",
+      "PropertyInspectorPath": "ui/pi.html",
+      "Controllers": ["Keypad"],
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false,
+      "States": [
+        { "Image": "imgs/actions/key/state" }
+      ]
+    }
+  ]
+}
