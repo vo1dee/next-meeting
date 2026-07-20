@@ -20,7 +20,7 @@ export function formatCountdown(msUntilStart: number): string {
   return `${Math.round(minutes / 60)}h`;
 }
 
-function truncateTitle(title: string, maxLength = 10): string {
+function truncateTitle(title: string, maxLength = 22): string {
   return title.length > maxLength ? title.slice(0, maxLength - 1) + "…" : title;
 }
 

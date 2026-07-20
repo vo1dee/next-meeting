@@ -20,6 +20,51 @@ function fontSize(text: string): number {
   return 42;
 }
 
+const TITLE_FONT_SIZE = 21;
+const TITLE_BASELINE_Y = 21;
+const TITLE_LINE_HEIGHT = 24;
+const TITLE_MAX_CHARS_PER_LINE = 10;
+const TITLE_MAX_LINES = 2;
+
+/** Greedy word-wrap into at most `maxLines`; anything left over is packed
+ * onto the last line and ellipsized if it still doesn't fit. */
+function wrapTitle(title: string, maxCharsPerLine: number, maxLines: number): string[] {
+  const words = title.split(" ");
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (!current || candidate.length <= maxCharsPerLine) {
+      current = candidate;
+    } else {
+      lines.push(current);
+      current = word;
+    }
+  }
+  if (current) lines.push(current);
+
+  if (lines.length > maxLines) {
+    const overflow = lines.slice(maxLines - 1).join(" ");
+    lines.length = maxLines - 1;
+    lines.push(overflow);
+  }
+  const lastIndex = lines.length - 1;
+  if (lines[lastIndex] && lines[lastIndex].length > maxCharsPerLine) {
+    lines[lastIndex] = `${lines[lastIndex].slice(0, maxCharsPerLine - 1)}…`;
+  }
+  return lines;
+}
+
+function titleMarkup(title: string, fg: string): string {
+  const tspans = wrapTitle(title, TITLE_MAX_CHARS_PER_LINE, TITLE_MAX_LINES)
+    .map((line, i) => `<tspan x="8" y="${TITLE_BASELINE_Y + i * TITLE_LINE_HEIGHT}">${line}</tspan>`)
+    .join("");
+  return (
+    `<text font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="600" ` +
+    `font-size="${TITLE_FONT_SIZE}" fill="${fg}" opacity="0.95">${tspans}</text>`
+  );
+}
+
 function svg(style: Style, text: string, stale: boolean): string {
   const markup =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
@@ -36,8 +81,7 @@ function svgWithMetadata(style: Style, text: string, title: string, stale: boole
   const markup =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
     `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
-    `<text x="8" y="21" font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="600" ` +
-    `font-size="20" fill="${style.fg}" opacity="0.95">${title}</text>` +
+    titleMarkup(title, style.fg) +
     `<text x="136" y="95" text-anchor="end" dominant-baseline="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
     `font-size="${fontSize(text)}" fill="${style.fg}">${text}</text>` +
