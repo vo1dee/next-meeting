@@ -9,18 +9,54 @@
         box-sizing: border-box;
       }
       body {
+        --font-color: #969696;
+        --font-family:
+          -apple-system, "Segoe UI", Arial, Roboto, Helvetica, sans-serif;
+        --window-bg-color: #161a22;
+        --nm-surface: #0d1117;
+        --nm-divider: #30363d;
+        --nm-border: #484f58;
+        --nm-text: #d8d8d8;
+        --nm-text-dim: #6e7681;
+        --input-bg-color: #21262d;
+        --input-font-color: #c9d1d9;
+        --nm-accent-bg: #238636;
+        --nm-accent-bg-hover: #2ea043;
+        --nm-warn: #e8a013;
+        --nm-warn-bg: rgba(232, 160, 19, 0.15);
         padding: 0;
-        background: #161a22;
+        background: var(--window-bg-color);
+        color: var(--nm-text);
+        font-family: var(--font-family);
       }
       sdpi-item {
-        margin-bottom: 20px;
+        margin-bottom: 16px;
+      }
+      .nm-section {
+        padding: 16px 0 4px;
+      }
+      .nm-section:first-of-type {
+        border-top: none;
+        padding-top: 0;
+      }
+      .nm-section + .nm-section {
+        border-top: 1px solid var(--nm-divider);
+      }
+      .nm-section__title {
+        font-size: 8pt;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--font-color);
+        opacity: 0.75;
+        margin: 0 0 10px;
       }
       #account-list {
-        color: #d8d8d8;
+        color: var(--nm-text);
         font-size: 10pt;
-        background: #0d1117;
+        background: var(--nm-surface);
         border-radius: 8px;
-        padding: 12px;
+        padding: 4px 12px;
         min-height: 80px;
         display: flex;
         flex-direction: column;
@@ -31,39 +67,76 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 12px;
         padding: 10px 0;
-        border-bottom: 1px solid #30363d;
+        border-bottom: 1px solid var(--nm-divider);
       }
       .account-row:last-child {
         border-bottom: none;
       }
-      .account-row span {
-        flex: 1;
+      .account-row--needs-reauth {
+        border-left: 3px solid var(--nm-warn);
+        padding-left: 8px;
+        margin-left: -8px;
       }
-      .account-row button {
-        margin-left: 12px;
+      .account-row__info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .account-row__info span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .account-row__badge {
+        align-self: flex-start;
+        font-size: 7.5pt;
+        font-weight: 600;
+        color: var(--nm-warn);
+        background: var(--nm-warn-bg);
+        border-radius: 4px;
+        padding: 1px 6px;
+      }
+      .account-row__actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .account-row__actions button {
         padding: 6px 12px;
         font-size: 9pt;
-        background: #21262d;
-        color: #c9d1d9;
-        border: 1px solid #30363d;
+        background: var(--input-bg-color);
+        color: var(--input-font-color);
+        border: 1px solid var(--nm-divider);
         border-radius: 6px;
         cursor: pointer;
         transition: all 0.2s ease;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
       }
-      .account-row button:hover {
-        background: #30363d;
-        border-color: #484f58;
+      .account-row__actions button:hover {
+        background: var(--nm-divider);
+        border-color: var(--nm-border);
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+      .account-row__actions button.reauthorize {
+        background: var(--nm-warn-bg);
+        color: var(--nm-warn);
+        border-color: var(--nm-warn);
+      }
+      .account-row__actions button.reauthorize:hover {
+        background: var(--nm-warn);
+        color: #161a22;
       }
       #connect-google,
       #get-pro {
         padding: 8px 16px;
         font-size: 10pt;
-        background: #238636;
+        background: var(--nm-accent-bg);
         color: #ffffff;
-        border: 1px solid #2ea043;
+        border: 1px solid var(--nm-accent-bg-hover);
         border-radius: 6px;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -71,21 +144,21 @@
       }
       #connect-google:hover:not([disabled]),
       #get-pro:hover {
-        background: #2ea043;
+        background: var(--nm-accent-bg-hover);
         box-shadow: 0 3px 8px rgba(35, 134, 54, 0.3);
       }
       #connect-google[disabled] {
-        background: #21262d;
-        color: #6e7681;
-        border-color: #30363d;
+        background: var(--input-bg-color);
+        color: var(--nm-text-dim);
+        border-color: var(--nm-divider);
         cursor: not-allowed;
         opacity: 0.6;
       }
       #account-hint {
-        color: #969696;
+        color: var(--font-color);
         font-size: 9pt;
         padding: 8px 12px;
-        background: #21262d;
+        background: var(--input-bg-color);
         border-radius: 6px;
         text-align: center;
       }
@@ -95,26 +168,35 @@
     </style>
   </head>
   <body>
-    <sdpi-item label="Account">
-      <div id="account-list">No account connected</div>
-    </sdpi-item>
-    <sdpi-item>
-      <sdpi-button id="connect-google">Connect Google Calendar</sdpi-button>
-    </sdpi-item>
-    <sdpi-item>
-      <div id="account-hint"></div>
-    </sdpi-item>
+    <div class="nm-section">
+      <div class="nm-section__title">Account</div>
+      <sdpi-item label="Account">
+        <div id="account-list">No account connected</div>
+      </sdpi-item>
+      <sdpi-item>
+        <sdpi-button id="connect-google">Connect Google Calendar</sdpi-button>
+      </sdpi-item>
+      <sdpi-item>
+        <div id="account-hint"></div>
+      </sdpi-item>
+    </div>
 
-    <sdpi-item label="Refresh every (min)">
-      <sdpi-range setting="refreshMinutes" global min="1" max="15" step="1" default="5" showlabels></sdpi-range>
-    </sdpi-item>
-    <sdpi-item label="Pre-meeting alert">
-      <sdpi-checkbox setting="preMeetingFlash" global label="Flash from 2 minutes before"></sdpi-checkbox>
-    </sdpi-item>
+    <div class="nm-section">
+      <div class="nm-section__title">Preferences</div>
+      <sdpi-item label="Refresh every (min)">
+        <sdpi-range setting="refreshMinutes" global min="1" max="15" step="1" default="5" showlabels></sdpi-range>
+      </sdpi-item>
+      <sdpi-item label="Pre-meeting alert">
+        <sdpi-checkbox setting="preMeetingFlash" global label="Flash from 2 minutes before"></sdpi-checkbox>
+      </sdpi-item>
+    </div>
 
-    <sdpi-item label="Next Meeting Pro">
-      <sdpi-button id="get-pro">Blend multiple calendars — Get Pro</sdpi-button>
-    </sdpi-item>
+    <div class="nm-section">
+      <div class="nm-section__title">Upgrade</div>
+      <sdpi-item label="Next Meeting Pro">
+        <sdpi-button id="get-pro">Blend multiple calendars — Get Pro</sdpi-button>
+      </sdpi-item>
+    </div>
 
     <script>
       const client = SDPIComponents.streamDeckClient;
@@ -122,20 +204,49 @@
       // TODO(T6): point at the real Marketplace listing once it exists.
       const PRO_URL = "https://vo1dee.com/next-meeting-pro";
 
-      function renderAccounts({ accounts, maxAccounts }) {
+      function renderAccounts({ accounts, maxAccounts, failedAccountIds }) {
+        const failedSet = new Set(failedAccountIds ?? []);
         const list = $("account-list");
-        list.textContent = accounts.length ? "" : "No account connected";
+        list.textContent = "";
+        if (!accounts.length) {
+          list.textContent = "No account connected";
+        }
         for (const account of accounts) {
+          const needsReauth = failedSet.has(account.id);
           const row = document.createElement("div");
-          row.className = "account-row";
+          row.className = needsReauth ? "account-row account-row--needs-reauth" : "account-row";
+
+          const info = document.createElement("div");
+          info.className = "account-row__info";
           const label = document.createElement("span");
           label.textContent = account.label;
+          info.append(label);
+          if (needsReauth) {
+            const badge = document.createElement("span");
+            badge.className = "account-row__badge";
+            badge.textContent = "Needs reauthorization";
+            info.append(badge);
+          }
+
+          const actions = document.createElement("div");
+          actions.className = "account-row__actions";
+          if (needsReauth) {
+            const reauth = document.createElement("button");
+            reauth.className = "reauthorize";
+            reauth.textContent = "Reauthorize";
+            reauth.addEventListener("click", () =>
+              client.send("sendToPlugin", { event: "reauthorizeAccount", accountId: account.id }),
+            );
+            actions.append(reauth);
+          }
           const remove = document.createElement("button");
           remove.textContent = "Disconnect";
           remove.addEventListener("click", () =>
             client.send("sendToPlugin", { event: "disconnectAccount", accountId: account.id }),
           );
-          row.append(label, remove);
+          actions.append(remove);
+
+          row.append(info, actions);
           list.append(row);
         }
         const atLimit = accounts.length >= maxAccounts;

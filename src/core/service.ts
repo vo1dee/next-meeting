@@ -1,11 +1,11 @@
 import streamDeck from "@elgato/streamdeck";
 
-import { AuthError } from "../auth/oauth";
 import type { CalendarEvent, CalendarProvider } from "../calendar/provider";
 import { DEFAULT_SETTINGS, withDefaults, type GlobalSettings } from "../settings";
 import { extractJoinLink } from "./join-link";
 import { computeKeyFace, type KeyFace } from "./keyface-state";
-import { buildAgenda, dedupeByICalUid, selectNextMeeting } from "./next-meeting";
+import { buildAgenda, selectNextMeeting } from "./next-meeting";
+import { reducePollResults } from "./poll-results";
 
 export type ProvidersSource = () => Promise<CalendarProvider[]>;
 
@@ -87,6 +87,11 @@ export class NextMeetingService {
     return selectNextMeeting(this.events, new Date());
   }
 
+  /** Account ids currently failing auth — feeds Settings' per-account reauthorize UI. */
+  failedAccountIds(): string[] {
+    return [...this.failedAccounts];
+  }
+
   /** Today's remaining Candidate Events for the Pro dial. */
   agenda(): CalendarEvent[] {
     return buildAgenda(this.events, new Date());
@@ -112,24 +117,16 @@ export class NextMeetingService {
     try {
       this.providers = await this.providersSource();
       const results = await Promise.allSettled(this.providers.map((p) => p.listDay(new Date())));
-      this.authFailed = false;
-      this.failedAccounts.clear();
-      let allOk = true;
-      for (const result of results) {
-        if (result.status === "rejected") {
-          allOk = false;
-          if (result.reason instanceof AuthError) {
-            this.authFailed = true;
-            if (result.reason.accountId) this.failedAccounts.add(result.reason.accountId);
-          } else {
-            // Agreed failure mode: keep serving the cached agenda — local time
-            // math stays valid; the face gains a stale marker after 30 min.
-            streamDeck.logger.warn("Calendar fetch failed; serving cached events", result.reason);
-          }
-        }
+      const outcome = reducePollResults(results);
+      this.authFailed = outcome.authFailed;
+      this.failedAccounts = new Set(outcome.failedAccountIds);
+      for (const err of outcome.otherErrors) {
+        // Agreed failure mode: keep serving the cached agenda — local time
+        // math stays valid; the face gains a stale marker after 30 min.
+        streamDeck.logger.warn("Calendar fetch failed; serving cached events", err);
       }
-      if (allOk) {
-        this.events = dedupeByICalUid(results.flatMap((r) => (r.status === "fulfilled" ? r.value : [])));
+      if (outcome.events !== undefined) {
+        this.events = outcome.events;
         this.lastPollOk = Date.now();
       }
     } catch (err) {

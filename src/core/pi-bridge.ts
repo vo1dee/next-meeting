@@ -1,15 +1,16 @@
 import streamDeck from "@elgato/streamdeck";
 
-import { connectAccount, disconnectAccount, getAccounts, maxAccounts } from "./accounts";
+import { connectAccount, disconnectAccount, getAccounts, maxAccounts, reauthorizeAccounts } from "./accounts";
 import type { NextMeetingService } from "./service";
 
 type PiMessage = { event?: string; provider?: string; accountId?: string };
 
-async function pushAccounts(): Promise<void> {
+async function pushAccounts(service: NextMeetingService): Promise<void> {
   await streamDeck.ui.current?.sendToPropertyInspector({
     event: "accounts",
     accounts: await getAccounts(),
     maxAccounts: maxAccounts(),
+    failedAccountIds: service.failedAccountIds(),
   });
 }
 
@@ -20,7 +21,7 @@ async function pushAccounts(): Promise<void> {
  * straight to globalSettings.
  */
 export function connectPiBridge(service: NextMeetingService): void {
-  streamDeck.ui.onDidAppear(() => void pushAccounts());
+  streamDeck.ui.onDidAppear(() => void pushAccounts(service));
   streamDeck.ui.onSendToPlugin((ev) => {
     const message = (typeof ev.payload === "object" && ev.payload !== null ? ev.payload : {}) as PiMessage;
     void (async () => {
@@ -38,10 +39,15 @@ export function connectPiBridge(service: NextMeetingService): void {
             await service.refreshNow();
           }
           break;
+        case "reauthorizeAccount":
+          if (message.accountId) {
+            if (await reauthorizeAccounts([message.accountId])) await service.refreshNow();
+          }
+          break;
         default:
           return;
       }
-      await pushAccounts();
+      await pushAccounts(service);
     })();
   });
 }

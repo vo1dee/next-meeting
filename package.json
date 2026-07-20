@@ -11,7 +11,7 @@
     "watch:free": "SKU=free rollup -c -w",
     "watch:pro": "SKU=pro rollup -c -w",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test src/core/next-meeting.test.ts src/core/join-link.test.ts src/core/keyface-state.test.ts src/core/agenda.test.ts"
+    "test": "node --import tsx --test src/core/next-meeting.test.ts src/core/join-link.test.ts src/core/keyface-state.test.ts src/core/agenda.test.ts src/core/service.test.ts"
   },
   "dependencies": {
     "@elgato/streamdeck": "^1.4.0"

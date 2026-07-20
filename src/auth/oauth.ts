@@ -1,20 +1,10 @@
 import streamDeck from "@elgato/streamdeck";
 
 import type { AccountRef } from "../settings";
+import { AuthError } from "./auth-error";
 import { startLoopback } from "./loopback";
 import { createPkce } from "./pkce";
 import type { TokenSet, TokenStore } from "./token-store";
-
-/** Calendar access failed for want of valid credentials — drives the "Auth" face. */
-export class AuthError extends Error {
-  constructor(
-    readonly accountId: string | undefined,
-    message: string,
-  ) {
-    super(message);
-    this.name = "AuthError";
-  }
-}
 
 type ProviderConfig = {
   authUrl: string;

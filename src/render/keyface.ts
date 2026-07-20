@@ -32,17 +32,15 @@ function svg(style: Style, text: string, stale: boolean): string {
   return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;
 }
 
-function svgWithMetadata(style: Style, text: string, title: string, nextTime: string, stale: boolean): string {
+function svgWithMetadata(style: Style, text: string, title: string, stale: boolean): string {
   const markup =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
     `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
-    `<text x="8" y="16" font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="500" ` +
-    `font-size="13" fill="${style.fg}" opacity="0.9">${title}</text>` +
+    `<text x="8" y="21" font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="600" ` +
+    `font-size="20" fill="${style.fg}" opacity="0.95">${title}</text>` +
     `<text x="136" y="95" text-anchor="end" dominant-baseline="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
     `font-size="${fontSize(text)}" fill="${style.fg}">${text}</text>` +
-    `<text x="136" y="130" text-anchor="end" font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="500" ` +
-    `font-size="9" fill="${style.fg}" opacity="0.8">${nextTime}</text>` +
     (stale ? `<circle cx="${SIZE - 16}" cy="16" r="7" fill="#9aa1ad" opacity="0.8"/>` : "") +
     `</svg>`;
   return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;
@@ -58,10 +56,10 @@ export function renderKeyFace(face: KeyFace, flashPhase = false, stale = false):
   switch (face.kind) {
     case "countdown": {
       const style = face.flash && flashPhase ? STYLES.flash : STYLES[face.urgency];
-      return svgWithMetadata(style, face.text, face.title, face.nextTime, stale);
+      return svgWithMetadata(style, face.text, face.title, stale);
     }
     case "now":
-      return svgWithMetadata(face.flash && flashPhase ? STYLES.flash : STYLES.imminent, "NOW", face.title, face.nextTime, stale);
+      return svgWithMetadata(face.flash && flashPhase ? STYLES.flash : STYLES.imminent, "NOW", face.title, stale);
     case "clear":
       return svg(STYLES.clear, "—", stale);
     case "auth":
