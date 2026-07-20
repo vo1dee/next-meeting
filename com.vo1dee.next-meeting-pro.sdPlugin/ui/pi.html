@@ -5,10 +5,96 @@
     <title>Next Meeting Pro Settings</title>
     <script src="sdpi-components.js"></script>
     <style>
-      #account-list { color: #d8d8d8; font-size: 9pt; }
-      .account-row { display: flex; align-items: center; justify-content: space-between; padding: 2px 0; }
-      .account-row button { margin-left: 8px; }
-      #account-hint { color: #969696; font-size: 8pt; padding: 2px 0 6px; }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        padding: 20px;
+        background: #161a22;
+      }
+      sdpi-item {
+        margin-bottom: 20px;
+      }
+      #account-list {
+        color: #d8d8d8;
+        font-size: 10pt;
+        background: #0d1117;
+        border-radius: 8px;
+        padding: 12px;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+      .account-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #30363d;
+      }
+      .account-row:last-child {
+        border-bottom: none;
+      }
+      .account-row span {
+        flex: 1;
+      }
+      .account-row button {
+        margin-left: 12px;
+        padding: 6px 12px;
+        font-size: 9pt;
+        background: #21262d;
+        color: #c9d1d9;
+        border: 1px solid #30363d;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+      .account-row button:hover {
+        background: #30363d;
+        border-color: #484f58;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+      #connect-google,
+      #connect-microsoft {
+        padding: 8px 16px;
+        font-size: 10pt;
+        background: #238636;
+        color: #ffffff;
+        border: 1px solid #2ea043;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        margin-right: 10px;
+        flex: 1;
+      }
+      #connect-google:hover:not([disabled]),
+      #connect-microsoft:hover:not([disabled]) {
+        background: #2ea043;
+        box-shadow: 0 3px 8px rgba(35, 134, 54, 0.3);
+      }
+      #connect-google[disabled],
+      #connect-microsoft[disabled] {
+        background: #21262d;
+        color: #6e7681;
+        border-color: #30363d;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      #account-hint {
+        color: #969696;
+        font-size: 9pt;
+        padding: 8px 12px;
+        background: #21262d;
+        border-radius: 6px;
+        text-align: center;
+      }
+      sdpi-button {
+        display: flex;
+      }
     </style>
   </head>
   <body>
@@ -16,8 +102,10 @@
       <div id="account-list">No account connected</div>
     </sdpi-item>
     <sdpi-item>
-      <sdpi-button id="connect-google">Connect Google</sdpi-button>
-      <sdpi-button id="connect-microsoft">Connect Microsoft</sdpi-button>
+      <div style="display: flex; gap: 10px;">
+        <sdpi-button id="connect-google" style="flex: 1;">Connect Google</sdpi-button>
+        <sdpi-button id="connect-microsoft" style="flex: 1;">Connect Microsoft</sdpi-button>
+      </div>
     </sdpi-item>
     <sdpi-item>
       <div id="account-hint"></div>
