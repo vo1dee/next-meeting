@@ -56,13 +56,14 @@ function wrapTitle(title: string, maxCharsPerLine: number, maxLines: number): st
 }
 
 function titleMarkup(title: string, fg: string): string {
-  const tspans = wrapTitle(title, TITLE_MAX_CHARS_PER_LINE, TITLE_MAX_LINES)
-    .map((line, i) => `<tspan x="8" y="${TITLE_BASELINE_Y + i * TITLE_LINE_HEIGHT}">${line}</tspan>`)
+  return wrapTitle(title, TITLE_MAX_CHARS_PER_LINE, TITLE_MAX_LINES)
+    .map(
+      (line, i) =>
+        `<text x="8" y="${TITLE_BASELINE_Y + i * TITLE_LINE_HEIGHT}" ` +
+        `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="600" ` +
+        `font-size="${TITLE_FONT_SIZE}" fill="${fg}" opacity="0.95">${line}</text>`,
+    )
     .join("");
-  return (
-    `<text font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="600" ` +
-    `font-size="${TITLE_FONT_SIZE}" fill="${fg}" opacity="0.95">${tspans}</text>`
-  );
 }
 
 function svg(style: Style, text: string, stale: boolean): string {
@@ -82,7 +83,7 @@ function svgWithMetadata(style: Style, text: string, title: string, stale: boole
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
     `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
     titleMarkup(title, style.fg) +
-    `<text x="136" y="95" text-anchor="end" dominant-baseline="middle" ` +
+    `<text x="130" y="95" text-anchor="end" dominant-baseline="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
     `font-size="${fontSize(text)}" fill="${style.fg}">${text}</text>` +
     (stale ? `<circle cx="${SIZE - 16}" cy="16" r="7" fill="#9aa1ad" opacity="0.8"/>` : "") +
