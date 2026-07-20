@@ -44,7 +44,7 @@ describe("computeKeyFace ladder", () => {
       kind: "countdown",
       text: "16m",
       title: "Event",
-      nextTime: "next 09:16",
+      nextTime: "09:16",
       urgency: "later",
       flash: false,
     });
@@ -55,7 +55,7 @@ describe("computeKeyFace ladder", () => {
       kind: "countdown",
       text: "14m",
       title: "Event",
-      nextTime: "next 09:14",
+      nextTime: "09:14",
       urgency: "soon",
       flash: false,
     });
@@ -63,7 +63,7 @@ describe("computeKeyFace ladder", () => {
       kind: "countdown",
       text: "4m",
       title: "Event",
-      nextTime: "next 09:04",
+      nextTime: "09:04",
       urgency: "imminent",
       flash: false,
     });
@@ -74,7 +74,7 @@ describe("computeKeyFace ladder", () => {
       kind: "countdown",
       text: "2m",
       title: "Event",
-      nextTime: "next 09:01",
+      nextTime: "09:01",
       urgency: "imminent",
       flash: true,
     });
@@ -82,14 +82,14 @@ describe("computeKeyFace ladder", () => {
       kind: "countdown",
       text: "2m",
       title: "Event",
-      nextTime: "next 09:01",
+      nextTime: "09:01",
       urgency: "imminent",
       flash: false,
     });
   });
 
   it("started → NOW: flashing for 2 minutes, then solid", () => {
-    assert.deepEqual(computeKeyFace(meetingStartingIn(-m(1)), NOW, true), { kind: "now", title: "Event", nextTime: "next 08:59", flash: true });
-    assert.deepEqual(computeKeyFace(meetingStartingIn(-m(3)), NOW, true), { kind: "now", title: "Event", nextTime: "next 08:57", flash: false });
+    assert.deepEqual(computeKeyFace(meetingStartingIn(-m(1)), NOW, true), { kind: "now", title: "Event", nextTime: "08:59", flash: true });
+    assert.deepEqual(computeKeyFace(meetingStartingIn(-m(3)), NOW, true), { kind: "now", title: "Event", nextTime: "08:57", flash: false });
   });
 });

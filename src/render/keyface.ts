@@ -15,9 +15,9 @@ const STYLES: Record<string, Style> = {
 };
 
 function fontSize(text: string): number {
-  if (text.length <= 2) return 60;
-  if (text.length === 3) return 52;
-  return 44;
+  if (text.length <= 2) return 58;
+  if (text.length === 3) return 50;
+  return 42;
 }
 
 function svg(style: Style, text: string, stale: boolean): string {
@@ -36,8 +36,8 @@ function svgWithMetadata(style: Style, text: string, title: string, nextTime: st
   const markup =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
     `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
-    `<text x="8" y="14" font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="500" ` +
-    `font-size="10" fill="${style.fg}" opacity="0.9">${title}</text>` +
+    `<text x="8" y="16" font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="500" ` +
+    `font-size="13" fill="${style.fg}" opacity="0.9">${title}</text>` +
     `<text x="136" y="95" text-anchor="end" dominant-baseline="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
     `font-size="${fontSize(text)}" fill="${style.fg}">${text}</text>` +

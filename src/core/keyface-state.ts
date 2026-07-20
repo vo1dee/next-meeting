@@ -26,6 +26,10 @@ function formatTime(date: Date): string {
   return `${h}:${m}`;
 }
 
+function formatNextTime(date: Date): string {
+  return formatTime(date);
+}
+
 function truncateTitle(title: string, maxLength = 12): string {
   return title.length > maxLength ? title.slice(0, maxLength - 1) + "…" : title;
 }
@@ -39,7 +43,7 @@ function truncateTitle(title: string, maxLength = 12): string {
 export function computeKeyFace(next: CalendarEvent | undefined, now: Date, preMeetingFlash: boolean): KeyFace {
   if (!next) return { kind: "clear" };
   const title = truncateTitle(next.title);
-  const nextTime = `next ${formatTime(next.start)}`;
+  const nextTime = formatNextTime(next.start);
   const untilStart = next.start.getTime() - now.getTime();
   if (untilStart <= 0) return { kind: "now", title, nextTime, flash: -untilStart < NOW_FLASH_MS };
   const text = formatCountdown(untilStart);
