@@ -28,7 +28,7 @@ export function connectPiBridge(service: NextMeetingService): void {
         case "getAccounts":
           break;
         case "connectAccount":
-          if (message.provider === "google" || message.provider === "microsoft") {
+          if (message.provider === "google") {
             if (await connectAccount(message.provider)) await service.refreshNow();
           }
           break;

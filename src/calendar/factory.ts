@@ -2,7 +2,6 @@ import { oauthManager } from "../auth/context";
 import { getAccounts } from "../core/accounts";
 import { GoogleCalendarProvider } from "./google";
 import { MockCalendarProvider } from "./mock-provider";
-import { GraphCalendarProvider } from "./msgraph";
 import type { CalendarProvider } from "./provider";
 
 /**
@@ -12,9 +11,5 @@ import type { CalendarProvider } from "./provider";
 export async function buildProviders(): Promise<CalendarProvider[]> {
   if (process.env.NEXT_MEETING_MOCK === "1") return [new MockCalendarProvider()];
   const accounts = await getAccounts();
-  return accounts.map((account) =>
-    account.provider === "google"
-      ? new GoogleCalendarProvider(account, oauthManager)
-      : new GraphCalendarProvider(account, oauthManager),
-  );
+  return accounts.map((account) => new GoogleCalendarProvider(account, oauthManager));
 }

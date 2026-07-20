@@ -57,8 +57,7 @@
         border-color: #484f58;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
       }
-      #connect-google,
-      #connect-microsoft {
+      #connect-google {
         padding: 8px 16px;
         font-size: 10pt;
         background: #238636;
@@ -68,16 +67,12 @@
         cursor: pointer;
         transition: all 0.2s ease;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        margin-right: 10px;
-        flex: 1;
       }
-      #connect-google:hover:not([disabled]),
-      #connect-microsoft:hover:not([disabled]) {
+      #connect-google:hover:not([disabled]) {
         background: #2ea043;
         box-shadow: 0 3px 8px rgba(35, 134, 54, 0.3);
       }
-      #connect-google[disabled],
-      #connect-microsoft[disabled] {
+      #connect-google[disabled] {
         background: #21262d;
         color: #6e7681;
         border-color: #30363d;
@@ -102,10 +97,7 @@
       <div id="account-list">No account connected</div>
     </sdpi-item>
     <sdpi-item>
-      <div style="display: flex; gap: 10px;">
-        <sdpi-button id="connect-google" style="flex: 1;">Connect Google</sdpi-button>
-        <sdpi-button id="connect-microsoft" style="flex: 1;">Connect Microsoft</sdpi-button>
-      </div>
+      <sdpi-button id="connect-google">Connect Google Calendar</sdpi-button>
     </sdpi-item>
     <sdpi-item>
       <div id="account-hint"></div>
@@ -129,7 +121,7 @@
           const row = document.createElement("div");
           row.className = "account-row";
           const label = document.createElement("span");
-          label.textContent = `${account.provider === "google" ? "Google" : "Microsoft"} — ${account.label}`;
+          label.textContent = account.label;
           const remove = document.createElement("button");
           remove.textContent = "Disconnect";
           remove.addEventListener("click", () =>
@@ -140,7 +132,6 @@
         }
         const atLimit = accounts.length >= maxAccounts;
         $("connect-google").toggleAttribute("disabled", atLimit);
-        $("connect-microsoft").toggleAttribute("disabled", atLimit);
         $("account-hint").textContent = atLimit ? "Account limit reached." : "";
       }
 
@@ -151,9 +142,6 @@
 
       $("connect-google").addEventListener("click", () =>
         client.send("sendToPlugin", { event: "connectAccount", provider: "google" }),
-      );
-      $("connect-microsoft").addEventListener("click", () =>
-        client.send("sendToPlugin", { event: "connectAccount", provider: "microsoft" }),
       );
 
       client.send("sendToPlugin", { event: "getAccounts" });

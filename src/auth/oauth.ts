@@ -26,9 +26,8 @@ type ProviderConfig = {
   extraAuthParams?: Record<string, string>;
 };
 
-// TODO(release): register the real clients — Google Cloud Console "Desktop app"
-// (needs the vo1dee.com privacy policy for sensitive-scope verification) and an
-// Azure app registration marked public client with the http://localhost redirect.
+// TODO(release): register the real client — Google Cloud Console "Desktop app"
+// (needs the vo1dee.com privacy policy for sensitive-scope verification).
 export const OAUTH_CONFIG: Record<AccountRef["provider"], ProviderConfig> = {
   google: {
     authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
@@ -37,12 +36,6 @@ export const OAUTH_CONFIG: Record<AccountRef["provider"], ProviderConfig> = {
     clientSecret: process.env.NM_GOOGLE_CLIENT_SECRET ?? "REPLACE_ME",
     scopes: ["openid", "email", "https://www.googleapis.com/auth/calendar.readonly"],
     extraAuthParams: { access_type: "offline", prompt: "consent" },
-  },
-  microsoft: {
-    authUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-    tokenUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-    clientId: process.env.NM_MS_CLIENT_ID ?? "REPLACE_ME-azure-app-guid",
-    scopes: ["openid", "email", "offline_access", "https://graph.microsoft.com/Calendars.Read"],
   },
 };
 
@@ -142,7 +135,6 @@ export class OAuthManager {
         refresh_token: tokens.refreshToken,
         client_id: config.clientId,
         ...(config.clientSecret ? { client_secret: config.clientSecret } : {}),
-        ...(account.provider === "microsoft" ? { scope: config.scopes.join(" ") } : {}),
       });
     } catch (err) {
       throw new AuthError(account.id, `Refresh failed: ${err instanceof Error ? err.message : String(err)}`);

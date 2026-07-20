@@ -3,7 +3,7 @@ import type { TokenSet } from "./auth/token-store";
 /** A connected calendar account (display reference; tokens live in the TokenStore). */
 export type AccountRef = {
   id: string;
-  provider: "google" | "microsoft";
+  provider: "google";
   /** Display label, e.g. the account's email address. */
   label: string;
 };
