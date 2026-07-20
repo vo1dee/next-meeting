@@ -8,8 +8,8 @@ export const ALERT_MS = 2 * 60_000;
 export const NOW_FLASH_MS = 2 * 60_000;
 
 export type KeyFace =
-  | { kind: "countdown"; text: string; urgency: "later" | "soon" | "imminent"; flash: boolean }
-  | { kind: "now"; flash: boolean }
+  | { kind: "countdown"; text: string; title: string; nextTime: string; urgency: "later" | "soon" | "imminent"; flash: boolean }
+  | { kind: "now"; title: string; nextTime: string; flash: boolean }
   | { kind: "clear" }
   | { kind: "auth" };
 
@@ -20,6 +20,16 @@ export function formatCountdown(msUntilStart: number): string {
   return `${Math.round(minutes / 60)}h`;
 }
 
+function formatTime(date: Date): string {
+  const h = String(date.getHours()).padStart(2, "0");
+  const m = String(date.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
+function truncateTitle(title: string, maxLength = 12): string {
+  return title.length > maxLength ? title.slice(0, maxLength - 1) + "…" : title;
+}
+
 /**
  * Ladder: ≥15m later (green) → <15m soon (amber) → <5m imminent (red) →
  * ≤2m imminent+flash (if the pre-meeting alert is on) → started: NOW,
@@ -28,11 +38,13 @@ export function formatCountdown(msUntilStart: number): string {
  */
 export function computeKeyFace(next: CalendarEvent | undefined, now: Date, preMeetingFlash: boolean): KeyFace {
   if (!next) return { kind: "clear" };
+  const title = truncateTitle(next.title);
+  const nextTime = `next ${formatTime(next.start)}`;
   const untilStart = next.start.getTime() - now.getTime();
-  if (untilStart <= 0) return { kind: "now", flash: -untilStart < NOW_FLASH_MS };
+  if (untilStart <= 0) return { kind: "now", title, nextTime, flash: -untilStart < NOW_FLASH_MS };
   const text = formatCountdown(untilStart);
-  if (untilStart <= ALERT_MS) return { kind: "countdown", text, urgency: "imminent", flash: preMeetingFlash };
-  if (untilStart < IMMINENT_MS) return { kind: "countdown", text, urgency: "imminent", flash: false };
-  if (untilStart < SOON_MS) return { kind: "countdown", text, urgency: "soon", flash: false };
-  return { kind: "countdown", text, urgency: "later", flash: false };
+  if (untilStart <= ALERT_MS) return { kind: "countdown", text, title, nextTime, urgency: "imminent", flash: preMeetingFlash };
+  if (untilStart < IMMINENT_MS) return { kind: "countdown", text, title, nextTime, urgency: "imminent", flash: false };
+  if (untilStart < SOON_MS) return { kind: "countdown", text, title, nextTime, urgency: "soon", flash: false };
+  return { kind: "countdown", text, title, nextTime, urgency: "later", flash: false };
 }

@@ -32,6 +32,22 @@ function svg(style: Style, text: string, stale: boolean): string {
   return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;
 }
 
+function svgWithMetadata(style: Style, text: string, title: string, nextTime: string, stale: boolean): string {
+  const markup =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
+    `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
+    `<text x="8" y="14" font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="500" ` +
+    `font-size="10" fill="${style.fg}" opacity="0.9">${title}</text>` +
+    `<text x="136" y="95" text-anchor="end" dominant-baseline="middle" ` +
+    `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
+    `font-size="${fontSize(text)}" fill="${style.fg}">${text}</text>` +
+    `<text x="136" y="130" text-anchor="end" font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="500" ` +
+    `font-size="9" fill="${style.fg}" opacity="0.8">${nextTime}</text>` +
+    (stale ? `<circle cx="${SIZE - 16}" cy="16" r="7" fill="#9aa1ad" opacity="0.8"/>` : "") +
+    `</svg>`;
+  return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;
+}
+
 /**
  * Render a KeyFace as an SVG data URI for setImage(). Flashing is the
  * caller's clock: it alternates `flashPhase` at 1 Hz and re-renders; the
@@ -42,10 +58,10 @@ export function renderKeyFace(face: KeyFace, flashPhase = false, stale = false):
   switch (face.kind) {
     case "countdown": {
       const style = face.flash && flashPhase ? STYLES.flash : STYLES[face.urgency];
-      return svg(style, face.text, stale);
+      return svgWithMetadata(style, face.text, face.title, face.nextTime, stale);
     }
     case "now":
-      return svg(face.flash && flashPhase ? STYLES.flash : STYLES.imminent, "NOW", stale);
+      return svgWithMetadata(face.flash && flashPhase ? STYLES.flash : STYLES.imminent, "NOW", face.title, face.nextTime, stale);
     case "clear":
       return svg(STYLES.clear, "—", stale);
     case "auth":
