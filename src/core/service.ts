@@ -92,9 +92,14 @@ export class NextMeetingService {
     return [...this.failedAccounts];
   }
 
-  /** Today's remaining Candidate Events for the Pro dial. */
+  /** Today's remaining Candidate Events for the Pro dial and the Pro key's agenda view. */
   agenda(): CalendarEvent[] {
     return buildAgenda(this.events, new Date());
+  }
+
+  /** Which key gesture joins vs. shows the agenda list (Pro key only). */
+  holdToJoin(): boolean {
+    return this.settings.holdToJoin;
   }
 
   /** Join URL for one agenda entry — the key's exact press semantics. */

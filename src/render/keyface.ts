@@ -1,3 +1,4 @@
+import type { CalendarEvent } from "../calendar/provider";
 import type { KeyFace } from "../core/keyface-state";
 
 const SIZE = 144;
@@ -86,6 +87,51 @@ function svgWithMetadata(style: Style, text: string, title: string, stale: boole
     `<text x="130" y="125" text-anchor="end" dominant-baseline="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
     `font-size="${fontSize(text)}" fill="${style.fg}">${text}</text>` +
+    (stale ? `<circle cx="${SIZE - 16}" cy="16" r="7" fill="#9aa1ad" opacity="0.8"/>` : "") +
+    `</svg>`;
+  return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;
+}
+
+const AGENDA_STYLE: Style = STYLES.later;
+const AGENDA_LABEL_Y = 16;
+const AGENDA_ROW_Y = 40;
+const AGENDA_ROW_HEIGHT = 26;
+const AGENDA_MAX_ROWS = 4;
+const AGENDA_ROW_MAX_CHARS = 12;
+
+function truncate(text: string, maxLength: number): string {
+  return text.length > maxLength ? text.slice(0, maxLength - 1) + "…" : text;
+}
+
+function agendaRowsMarkup(entries: CalendarEvent[], fg: string): string {
+  if (entries.length === 0) {
+    return (
+      `<text x="72" y="76" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" ` +
+      `font-size="13" fill="${fg}" opacity="0.8">No more meetings</text>`
+    );
+  }
+  return entries
+    .slice(0, AGENDA_MAX_ROWS)
+    .map((entry, i) => {
+      const clock = entry.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const label = truncate(entry.title, AGENDA_ROW_MAX_CHARS);
+      return (
+        `<text x="8" y="${AGENDA_ROW_Y + i * AGENDA_ROW_HEIGHT}" ` +
+        `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="600" ` +
+        `font-size="13" fill="${fg}">${clock} ${label}</text>`
+      );
+    })
+    .join("");
+}
+
+/** Pro key's agenda view — up to today's next four Candidate Events, toggled in by the other press gesture. */
+export function renderAgendaFace(entries: CalendarEvent[], stale: boolean): string {
+  const markup =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
+    `<rect width="${SIZE}" height="${SIZE}" fill="${AGENDA_STYLE.bg}"/>` +
+    `<text x="8" y="${AGENDA_LABEL_Y}" font-family="-apple-system, 'Segoe UI', sans-serif" ` +
+    `font-weight="700" font-size="10" letter-spacing="1" fill="${AGENDA_STYLE.fg}" opacity="0.7">AGENDA</text>` +
+    agendaRowsMarkup(entries, AGENDA_STYLE.fg) +
     (stale ? `<circle cx="${SIZE - 16}" cy="16" r="7" fill="#9aa1ad" opacity="0.8"/>` : "") +
     `</svg>`;
   return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;

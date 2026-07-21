@@ -1,16 +1,35 @@
-import streamDeck, { action, KeyDownEvent, SingletonAction, WillAppearEvent } from "@elgato/streamdeck";
+import streamDeck, {
+  action,
+  KeyDownEvent,
+  KeyUpEvent,
+  SingletonAction,
+  WillAppearEvent,
+} from "@elgato/streamdeck";
 
 import { reauthorizeAccounts } from "../core/accounts";
 import type { NextMeetingService } from "../core/service";
-import { renderKeyFace } from "../render/keyface";
+import { renderAgendaFace, renderKeyFace } from "../render/keyface";
+import { isProUser } from "../tier";
+
+/** Held this long counts as a long press rather than a tap. */
+const LONG_PRESS_MS = 450;
+/** Agenda view auto-reverts to the countdown after this long (mirrors the dial's snap-back). */
+const AGENDA_REVERT_MS = 10_000;
 
 /**
  * The key face: countdown ladder + one-tap join. Press semantics (agreed):
  * Join Link → event page → day view when Clear → re-auth when Auth.
+ *
+ * Pro adds a second gesture: whichever of tap / press-and-hold isn't mapped
+ * to Join toggles a temporary agenda list view (settings: holdToJoin).
  */
 @action({ UUID: `${__PLUGIN_UUID__}.key` })
 export class NextMeetingKey extends SingletonAction {
   private unsubscribe?: () => void;
+  private longPressTimer?: ReturnType<typeof setTimeout>;
+  private longPressFired = false;
+  private showingAgenda = false;
+  private agendaRevertTimer?: ReturnType<typeof setTimeout>;
 
   constructor(private readonly service: NextMeetingService) {
     super();
@@ -21,7 +40,38 @@ export class NextMeetingKey extends SingletonAction {
     void this.render();
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+  override onKeyDown(ev: KeyDownEvent): void {
+    if (!isProUser()) {
+      void this.join(ev); // free tier: unchanged, joins immediately on press
+      return;
+    }
+    this.longPressFired = false;
+    this.longPressTimer = setTimeout(() => {
+      this.longPressFired = true;
+      void this.handleGesture("long", ev);
+    }, LONG_PRESS_MS);
+  }
+
+  override async onKeyUp(ev: KeyUpEvent): Promise<void> {
+    if (!isProUser()) return; // handled on key down, as before
+    clearTimeout(this.longPressTimer);
+    if (this.longPressFired) return; // already handled when the hold threshold fired
+    await this.handleGesture("short", ev);
+  }
+
+  /** Post-join hook — auto-mute (deferred past v1.0) slots in here. */
+  protected onJoined(): void {}
+
+  private async handleGesture(gesture: "short" | "long", ev: KeyDownEvent | KeyUpEvent): Promise<void> {
+    const joinGesture = this.service.holdToJoin() ? "long" : "short";
+    if (gesture === joinGesture) {
+      await this.join(ev);
+    } else {
+      this.toggleAgenda();
+    }
+  }
+
+  private async join(ev: KeyDownEvent | KeyUpEvent): Promise<void> {
     const press = this.service.pressAction();
     switch (press.kind) {
       case "open":
@@ -43,13 +93,23 @@ export class NextMeetingKey extends SingletonAction {
     }
   }
 
-  /** Post-join hook — auto-mute (deferred past v1.0) slots in here. */
-  protected onJoined(): void {}
+  private toggleAgenda(): void {
+    this.showingAgenda = !this.showingAgenda;
+    clearTimeout(this.agendaRevertTimer);
+    if (this.showingAgenda) {
+      this.agendaRevertTimer = setTimeout(() => {
+        this.showingAgenda = false;
+        void this.render();
+      }, AGENDA_REVERT_MS);
+    }
+    void this.render();
+  }
 
   /** Renders the current face onto every visible instance of this action. */
   private async render(): Promise<void> {
     const { face, flashPhase, stale } = this.service.face();
-    const image = renderKeyFace(face, flashPhase, stale);
+    const image =
+      this.showingAgenda ? renderAgendaFace(this.service.agenda(), stale) : renderKeyFace(face, flashPhase, stale);
     for (const instance of this.actions) {
       await instance.setImage(image);
     }
