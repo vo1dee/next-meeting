@@ -93,11 +93,15 @@ function svgWithMetadata(style: Style, text: string, title: string, stale: boole
 }
 
 const AGENDA_STYLE: Style = STYLES.later;
-const AGENDA_LABEL_Y = 16;
-const AGENDA_ROW_Y = 40;
-const AGENDA_ROW_HEIGHT = 26;
-const AGENDA_MAX_ROWS = 4;
-const AGENDA_ROW_MAX_CHARS = 12;
+const AGENDA_LABEL_Y = 14;
+const AGENDA_MAX_ROWS = 2;
+/** Vertical space allotted per entry (time line + title line). */
+const AGENDA_ROW_HEIGHT = 60;
+const AGENDA_TIME_Y = 36;
+const AGENDA_TITLE_Y = 56;
+const AGENDA_TIME_FONT_SIZE = 12;
+const AGENDA_TITLE_FONT_SIZE = 17;
+const AGENDA_TITLE_MAX_CHARS = 13;
 
 function truncate(text: string, maxLength: number): string {
   return text.length > maxLength ? text.slice(0, maxLength - 1) + "…" : text;
@@ -107,24 +111,26 @@ function agendaRowsMarkup(entries: CalendarEvent[], fg: string): string {
   if (entries.length === 0) {
     return (
       `<text x="72" y="76" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" ` +
-      `font-size="13" fill="${fg}" opacity="0.8">No more meetings</text>`
+      `font-size="14" fill="${fg}" opacity="0.8">No more meetings</text>`
     );
   }
   return entries
     .slice(0, AGENDA_MAX_ROWS)
     .map((entry, i) => {
       const clock = entry.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const label = truncate(entry.title, AGENDA_ROW_MAX_CHARS);
+      const title = truncate(entry.title, AGENDA_TITLE_MAX_CHARS);
+      const y = i * AGENDA_ROW_HEIGHT;
       return (
-        `<text x="8" y="${AGENDA_ROW_Y + i * AGENDA_ROW_HEIGHT}" ` +
-        `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="600" ` +
-        `font-size="13" fill="${fg}">${clock} ${label}</text>`
+        `<text x="8" y="${AGENDA_TIME_Y + y}" font-family="-apple-system, 'Segoe UI', sans-serif" ` +
+        `font-weight="600" font-size="${AGENDA_TIME_FONT_SIZE}" fill="${fg}" opacity="0.7">${clock}</text>` +
+        `<text x="8" y="${AGENDA_TITLE_Y + y}" font-family="-apple-system, 'Segoe UI', sans-serif" ` +
+        `font-weight="700" font-size="${AGENDA_TITLE_FONT_SIZE}" fill="${fg}">${title}</text>`
       );
     })
     .join("");
 }
 
-/** Pro key's agenda view — up to today's next four Candidate Events, toggled in by the other press gesture. */
+/** Pro key's agenda view — today's next two Candidate Events, toggled in by the other press gesture. */
 export function renderAgendaFace(entries: CalendarEvent[], stale: boolean): string {
   const markup =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
