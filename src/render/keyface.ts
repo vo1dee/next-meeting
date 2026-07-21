@@ -83,7 +83,7 @@ function svgWithMetadata(style: Style, text: string, title: string, stale: boole
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
     `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
     titleMarkup(title, style.fg) +
-    `<text x="130" y="105" text-anchor="end" dominant-baseline="middle" ` +
+    `<text x="130" y="125" text-anchor="end" dominant-baseline="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
     `font-size="${fontSize(text)}" fill="${style.fg}">${text}</text>` +
     (stale ? `<circle cx="${SIZE - 16}" cy="16" r="7" fill="#9aa1ad" opacity="0.8"/>` : "") +
