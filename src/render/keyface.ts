@@ -21,8 +21,14 @@ function fontSize(text: string): number {
   return 42;
 }
 
-/** The "no upcoming meeting" dash reads small on its own; nudge it up. */
-const CLEAR_FONT_SIZE = 60;
+/**
+ * Calendar+clock glyph for the auth/clear placeholders, cut out of the
+ * plugin's static default-state art (imgs/actions/key/state@2x.png) so the
+ * live key face matches what's shown before the plugin finishes booting.
+ * Transparent background — composites onto either style's bg.
+ */
+const ICON_CALENDAR =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADsAAAA/CAYAAABetLClAAAFkUlEQVR42u2aa4hVVRTHf2d35uZYJI2i9sKeSkIzPQijopL6PhHZl6yIIguMhooeSKUFRTFhRTVQ0FuJILAv9UGQlCiamTInyB6gFpEaPTTECbN7+3DXHc7s2Weftc/j3sn6w2Wzz7337L3WOmut/1pnR/2DjW6gDhgZW7DnAA0gcsyLjC5Usk5SIFuwumMTkWNub9w1940EruNb17uO8WhWO/o24tp43vUixbpemAzNpmkyKsmCtHMdE6Bh30aqsKB2ncizzqS5yfDBKizYUFhS4/t41nX6vOmABSPFei7FFH5iTBt8cNr4vKnCN3L6YuXrmBJ841rgG2ALsDhnPhwC9sio9kHFOpPmRumTPs0+ApwKLAGuz5EPFwK3AD0yLizB950KMUof8Wn25MT1s3L44GJrfnbJzGlijHNw0plAH1BzKKIHuBw9Gg5h83JhW0E29TVR/2CjpthQBPQCTwFLqRYHgPXAQ8DvCkHUMErfuAkYaYOgAMcCtwHbgdMLcu5JRY5R5Kn5wFrajx7gpYL51yTLVQ2DugE4hs7gMonyZJSfdcVojCI/9dJZ9CkKGJNoQNjzCYGNIj+d2GFhj1da0KTMJxRgCvpEu2FcvugZJykkVvSE7pXISMaNtaOvx+XK9xeVtW6ssOQhYFxJPErJhxb+DrVgykicodkGsDolSLQLLwCbczw5UxAr6sMeYEEHha2FWrAIg5oOqDuCk69p6JQjVlQV9k3uAL6V+UxgDXABsBu4E/hNvpsLPA/MAYbFHf6Ue5ybg5WF9renyBUHduyHgVes63Pl2jvAe5YllgIrgCeAjYnrW4DbgUUFLR5UHWl6UEnMd1zvkXG249GalxjtYDK7hMc7qNcV0oMiB0dNo3T1HBZsaw8K4ATpRiTLsRZRP0eslbRci1cvAboSiugLtGwpPSgNg7LTwFcewv5zync3y0eDg8BOYJcEwk8p6S2ehkG1AweA94F1wAfCmjRBKKQHNYVU1K28ZfvWX5I2vpbfzZBIvAzYBlwF7JP/zQM+km6Dz4pDwJPAr4ke1xnAacCZcq8fgR3A1pw9qAYQxYo6MYmfEoLWZbOfiLBfJnIswF5gLEPYtdJriiQePAYsT/i3jT+ADVKc/BLY354QJoSCmQxGo42uK0TQGvA08J34dZfnf8cBN0rcuE4RvSeNmrrQ1lCaIo5SRNEWngNeFna1CRgAugOUNQd4G3gjpWXkjNKxok5N4hTgVomSkWxwmXx3BdAv7c8Ws7rEsZGNwN1i0XXAxR6hBoS0PJzy/XLgaLFyZlSO+gcbJqOw3gxcWlLUPSh5eg/wojzKafgCOB+YlVBgGtYI9/bW2cbTrKoCb4qgC2i+1/HhJBn3K+47IAHO++7HKILSxyUK+6psYJWnls6DWcBdacypNRpFXfhuSRvaL1VTV8LPQzmxD1en5NnIJWBaXTgKPFuCsFtlvFJSSB5O7MMi+aTmXe05qPuE5RShlLsSm6ICyyLsrlAPqgEcBh6UR7pXgkcomfhQxu4AQVvrG0twQ/ON4j3Wf7o1wmqrh1Hgs1BOas3HA4jDjEQrxzbEIcd/xrOEDa4LQzmpNd+tFNZIXg7B3qwbBp9NCPA11zhWUQ5vAJ9nCZu7PsyIomkK2w58X4GwY1IVqSwbpTSx8lrQ98S8VoGwQxq/qPIsYprgz0iRXxZ20HxLj8ayVVkwTSH7SiIqLTyK8ghup84iri5J4PuB17XhXWtBbX82hOoNAI8XiL4PCLkgj7B5fVCbd11YRfMY4GiAoD8A1wiFJVTYoj5YFOuBC2mezBmWLqYLI8BK6T5uCF0kLtEHy8Bb8omB80QBNWmlbpOmXG6EcuOqjhLYOCxWHCnzpqYNPjlt4DsHdcTB8O84/1SasP8Z/C/skYp/ABvwB8LF86oZAAAAAElFTkSuQmCC";
 
 const TITLE_FONT_SIZE = 21;
 const TITLE_BASELINE_Y = 31;
@@ -70,29 +76,25 @@ function titleMarkup(title: string, fg: string): string {
     .join("");
 }
 
-function svg(style: Style, text: string, stale: boolean, overrideFontSize?: number): string {
+/**
+ * Icon + two centered lines — used for the Auth and Clear placeholders, so
+ * both read as a clear instruction/status rather than a bare word or dash,
+ * and match the calendar icon shown before the plugin finishes booting.
+ * Text colour is fixed (not style.fg) since STYLES.clear's fg is
+ * deliberately too dim to double as body copy here.
+ */
+function svgPlaceholder(style: Style, line1: string, line2: string, stale: boolean): string {
   const markup =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
     `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
-    `<text x="50%" y="53%" text-anchor="middle" dominant-baseline="middle" ` +
+    `<image x="42.5" y="12" width="59" height="63" href="${ICON_CALENDAR}"/>` +
+    `<text x="50%" y="92" text-anchor="middle" dominant-baseline="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
-    `font-size="${overrideFontSize ?? fontSize(text)}" fill="${style.fg}">${text}</text>` +
-    (stale ? `<circle cx="${SIZE - 16}" cy="16" r="7" fill="#9aa1ad" opacity="0.8"/>` : "") +
-    `</svg>`;
-  return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;
-}
-
-/** Two centered lines — used for the Auth face so it reads as an instruction, not a status word. */
-function svgTwoLine(style: Style, line1: string, line2: string): string {
-  const markup =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
-    `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
-    `<text x="50%" y="46%" text-anchor="middle" dominant-baseline="middle" ` +
-    `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
-    `font-size="24" fill="${style.fg}">${line1}</text>` +
-    `<text x="50%" y="65%" text-anchor="middle" dominant-baseline="middle" ` +
+    `font-size="17" fill="#e8edf7">${line1}</text>` +
+    `<text x="50%" y="112" text-anchor="middle" dominant-baseline="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="600" ` +
-    `font-size="17" fill="${style.fg}" opacity="0.75">${line2}</text>` +
+    `font-size="14" fill="#94a1b7">${line2}</text>` +
+    (stale ? `<circle cx="${SIZE - 16}" cy="16" r="7" fill="#9aa1ad" opacity="0.8"/>` : "") +
     `</svg>`;
   return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;
 }
@@ -176,8 +178,8 @@ export function renderKeyFace(face: KeyFace, flashPhase = false, stale = false):
     case "now":
       return svgWithMetadata(face.flash && flashPhase ? STYLES.flash : STYLES.imminent, "NOW", face.title, stale);
     case "clear":
-      return svg(STYLES.clear, "—", stale, CLEAR_FONT_SIZE);
+      return svgPlaceholder(STYLES.clear, "No upcoming", "meeting", stale);
     case "auth":
-      return svgTwoLine(STYLES.auth, "Connect", "calendar");
+      return svgPlaceholder(STYLES.auth, "Connect", "calendar", false);
   }
 }
