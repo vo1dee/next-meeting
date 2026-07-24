@@ -3,13 +3,12 @@ import streamDeck from "@elgato/streamdeck";
 import { tokenStore } from "../auth/context";
 import { runOAuthFlow } from "../auth/oauth";
 import { withDefaults, type AccountRef, type GlobalSettings } from "../settings";
-import { isProUser } from "../tier";
 
 export type ProviderKind = AccountRef["provider"];
 
-/** Free: exactly one account; Pro: blended multi-account (practical cap). */
+/** A practical cap for blended calendar accounts. */
 export function maxAccounts(): number {
-  return isProUser() ? 8 : 1;
+  return 8;
 }
 
 async function readSettings(): Promise<GlobalSettings> {
@@ -23,7 +22,7 @@ export async function getAccounts(): Promise<AccountRef[]> {
 /** Interactive loopback+PKCE flow (ADR-0001); persists the account and its tokens. */
 export async function connectAccount(provider: ProviderKind): Promise<boolean> {
   if ((await getAccounts()).length >= maxAccounts()) {
-    streamDeck.logger.info("Account limit reached for this tier; connect refused");
+    streamDeck.logger.info("Account limit reached; connect refused");
     return false;
   }
   try {

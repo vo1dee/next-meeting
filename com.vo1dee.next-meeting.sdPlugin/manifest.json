@@ -4,7 +4,7 @@
   "Name": "Next Meeting",
   "Version": "0.1.0.0",
   "Author": "vo1dee",
-  "Description": "Glance at the time until your next meeting and join it with one tap. Connects to Google Calendar or Outlook.",
+  "Description": "Glance at the time until your next meeting and join it with one tap. Blend calendars and scroll today's agenda on a Stream Deck + dial.",
   "URL": "https://vo1dee.com",
   "Icon": "imgs/plugin/icon",
   "Category": "Next Meeting",
@@ -42,6 +42,29 @@
       "States": [
         {
           "Image": "imgs/actions/key/state"
+        }
+      ]
+    },
+    {
+      "UUID": "com.vo1dee.next-meeting.dial",
+      "Name": "Agenda Dial",
+      "Tooltip": "Rotate to scroll today's agenda. Press to join the selected meeting.",
+      "Icon": "imgs/actions/dial/icon",
+      "PropertyInspectorPath": "ui/pi.html",
+      "Controllers": [
+        "Encoder"
+      ],
+      "Encoder": {
+        "layout": "$B1",
+        "TriggerDescription": {
+          "Rotate": "Scroll agenda",
+          "Push": "Join selected meeting",
+          "Touch": "Join selected meeting"
+        }
+      },
+      "States": [
+        {
+          "Image": "imgs/actions/dial/state"
         }
       ]
     }

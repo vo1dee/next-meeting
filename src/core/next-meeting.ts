@@ -1,4 +1,3 @@
-import { NOW_FLASH_MS } from "./keyface-state";
 import type { CalendarEvent } from "../calendar/provider";
 
 /** How long an already-started event keeps counting as the Next Meeting. */
@@ -27,16 +26,11 @@ export function isCandidate(event: CalendarEvent, now: Date): boolean {
   return true;
 }
 
-/** The Next Meeting: earliest-starting Candidate Event (CONTEXT.md).
- * After showing a meeting for NOW_FLASH_MS (2 min), skip it and pick the next one. */
+/** The Next Meeting: earliest-starting Candidate Event (CONTEXT.md). */
 export function selectNextMeeting(events: CalendarEvent[], now: Date): CalendarEvent | undefined {
   let best: CalendarEvent | undefined;
   for (const event of events) {
     if (!isCandidate(event, now)) continue;
-    // Skip meetings that started >2min ago (already shown as NOW long enough).
-    if (event.start.getTime() < now.getTime() && now.getTime() - event.start.getTime() > NOW_FLASH_MS) {
-      continue;
-    }
     if (!best || event.start.getTime() < best.start.getTime()) {
       best = event;
     }

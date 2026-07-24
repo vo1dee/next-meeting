@@ -9,7 +9,6 @@ import streamDeck, {
 import { reauthorizeAccounts } from "../core/accounts";
 import type { NextMeetingService } from "../core/service";
 import { renderAgendaFace, renderKeyFace } from "../render/keyface";
-import { isProUser } from "../tier";
 
 /** Held this long counts as a long press rather than a tap. */
 const LONG_PRESS_MS = 450;
@@ -20,7 +19,7 @@ const AGENDA_REVERT_MS = 10_000;
  * The key face: countdown ladder + one-tap join. Press semantics (agreed):
  * Join Link → event page → day view when Clear → re-auth when Auth.
  *
- * Pro adds a second gesture: whichever of tap / press-and-hold isn't mapped
+ * A second gesture lets the user toggle a temporary agenda list: whichever of tap / press-and-hold isn't mapped
  * to Join toggles a temporary agenda list view (settings: holdToJoin).
  */
 @action({ UUID: `${__PLUGIN_UUID__}.key` })
@@ -41,10 +40,6 @@ export class NextMeetingKey extends SingletonAction {
   }
 
   override onKeyDown(ev: KeyDownEvent): void {
-    if (!isProUser()) {
-      void this.join(ev); // free tier: unchanged, joins immediately on press
-      return;
-    }
     this.longPressFired = false;
     this.longPressTimer = setTimeout(() => {
       this.longPressFired = true;
@@ -53,7 +48,6 @@ export class NextMeetingKey extends SingletonAction {
   }
 
   override async onKeyUp(ev: KeyUpEvent): Promise<void> {
-    if (!isProUser()) return; // handled on key down, as before
     clearTimeout(this.longPressTimer);
     if (this.longPressFired) return; // already handled when the hold threshold fired
     await this.handleGesture("short", ev);

@@ -130,8 +130,7 @@
         background: var(--nm-warn);
         color: #161a22;
       }
-      #connect-google,
-      #get-pro {
+      #connect-google {
         padding: 8px 16px;
         font-size: 10pt;
         background: var(--nm-accent-bg);
@@ -142,8 +141,7 @@
         transition: all 0.2s ease;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       }
-      #connect-google:hover:not([disabled]),
-      #get-pro:hover {
+      #connect-google:hover:not([disabled]) {
         background: var(--nm-accent-bg-hover);
         box-shadow: 0 3px 8px rgba(35, 134, 54, 0.3);
       }
@@ -169,8 +167,8 @@
   </head>
   <body>
     <div class="nm-section">
-      <div class="nm-section__title">Account</div>
-      <sdpi-item label="Account">
+      <div class="nm-section__title">Accounts</div>
+      <sdpi-item label="Accounts">
         <div id="account-list">No account connected</div>
       </sdpi-item>
       <sdpi-item>
@@ -189,20 +187,22 @@
       <sdpi-item label="Pre-meeting alert">
         <sdpi-checkbox setting="preMeetingFlash" global label="Flash from 2 minutes before"></sdpi-checkbox>
       </sdpi-item>
-    </div>
-
-    <div class="nm-section">
-      <div class="nm-section__title">Upgrade</div>
-      <sdpi-item label="Next Meeting Pro">
-        <sdpi-button id="get-pro">Blend multiple calendars — Get Pro</sdpi-button>
+      <sdpi-item
+        label="Press-and-hold"
+        title="By default, a quick tap joins the meeting and press-and-hold shows today's agenda list. Turn this on to swap them: press-and-hold joins, and a quick tap shows the agenda."
+      >
+        <sdpi-checkbox
+          setting="holdToJoin"
+          global
+          label="Hold to join (tap shows the agenda list)"
+          title="By default, a quick tap joins the meeting and press-and-hold shows today's agenda list. Turn this on to swap them: press-and-hold joins, and a quick tap shows the agenda."
+        ></sdpi-checkbox>
       </sdpi-item>
     </div>
 
     <script>
       const client = SDPIComponents.streamDeckClient;
       const $ = (id) => document.getElementById(id);
-      // TODO(T6): point at the real Marketplace listing once it exists.
-      const PRO_URL = "https://vo1dee.com/next-meeting-pro";
 
       function renderAccounts({ accounts, maxAccounts, failedAccountIds }) {
         const failedSet = new Set(failedAccountIds ?? []);
@@ -251,10 +251,7 @@
         }
         const atLimit = accounts.length >= maxAccounts;
         $("connect-google").toggleAttribute("disabled", atLimit);
-        $("account-hint").textContent =
-          atLimit && maxAccounts === 1
-            ? "Free supports one account. Next Meeting Pro blends multiple calendars."
-            : "";
+        $("account-hint").textContent = atLimit ? "Account limit reached." : "";
       }
 
       client.sendToPropertyInspector.subscribe((message) => {
@@ -265,8 +262,6 @@
       $("connect-google").addEventListener("click", () =>
         client.send("sendToPlugin", { event: "connectAccount", provider: "google" }),
       );
-      $("get-pro").addEventListener("click", () => client.send("openUrl", { url: PRO_URL }));
-
       client.send("sendToPlugin", { event: "getAccounts" });
     </script>
   </body>

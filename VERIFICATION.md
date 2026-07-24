@@ -5,11 +5,10 @@ How to use: after each task is delivered, walk its checklist top to bottom. Ever
 ## Task 1 — Scaffold & manifests
 
 - [x] `npm install` completes, then `npm run typecheck` exits 0
-- [x] `npm run build` emits `com.vo1dee.next-meeting.sdPlugin/bin/plugin.js` and `com.vo1dee.next-meeting-pro.sdPlugin/bin/plugin.js`, each with a `bin/package.json` marking ESM
-- [x] Both manifests validate: `npx @elgato/cli validate <dir>` passes for both SKUs (2026-07-19; note — plugin-level Icon/CategoryIcon must be PNG, so those placeholders are PNGs while action icons stay SVG)
-- [x] Free manifest: exactly one action `com.vo1dee.next-meeting.key`, `Controllers: ["Keypad"]` — no Encoder action anywhere (ADR-0003 boundary)
-- [x] Pro manifest: two actions — `...pro.key` (Keypad) and `...pro.dial` (Encoder, `$B1` layout, rotate/push/touch descriptions)
-- [x] Both manifests: SDKVersion 2, Node 20, Stream Deck ≥ 6.5, mac ≥ 12 + windows ≥ 10, `UserTitleEnabled: false` on key actions (we own the rendered face)
+- [x] `npm run build` emits `com.vo1dee.next-meeting.sdPlugin/bin/plugin.js` with a `bin/package.json` marking ESM
+- [x] The manifest validates with `npx @elgato/cli validate com.vo1dee.next-meeting.sdPlugin` (plugin-level Icon/CategoryIcon must be PNG, so those placeholders are PNGs while action icons stay SVG)
+- [x] The free manifest includes two actions: `com.vo1dee.next-meeting.key` (Keypad) and `com.vo1dee.next-meeting.dial` (Encoder, `$B1` layout, rotate/push/touch descriptions)
+- [x] Manifest: SDKVersion 2, Node 20, Stream Deck ≥ 6.5, mac ≥ 12 + windows ≥ 10, `UserTitleEnabled: false` on the key action (we own the rendered face)
 - [x] All `Icon`/`Image` paths referenced by the manifests resolve to a file (checked by the CLI validator)
 - [ ] On a machine with Stream Deck installed: `streamdeck link com.vo1dee.next-meeting.sdPlugin` and the plugin appears in the app (smoke only; actions are stubs)
 
@@ -41,14 +40,13 @@ Runtime behavior (manual, `streamdeck link` + mock provider):
 
 ## Task 3 — Property Inspector
 
-Delivered 2026-07-19: sdpi-components v4 vendored into each SKU's `ui/` (PI works offline); account connect/disconnect routed through `pi-bridge.ts` at the UI-controller level so key and dial share one implementation; the free "Get Pro" button points at a vo1dee.com placeholder URL until the listing exists (T6). The boxes below are on-device acceptance checks — they need a machine with Stream Deck installed.
+Delivered 2026-07-19: sdpi-components v4 is vendored into `ui/` (PI works offline); account connect/disconnect is routed through `pi-bridge.ts` at the UI-controller level so key and dial share one implementation. The boxes below are on-device acceptance checks — they need a machine with Stream Deck installed.
 
-- [ ] PI renders with Elgato's native look (sdpi components) in both SKUs
+- [ ] PI renders with Elgato's native look (sdpi components)
 - [ ] Refresh slider: range 1–15 min, default 5; persists to globalSettings and survives Stream Deck restart
 - [ ] Pre-meeting flash toggle: default on; persists
 - [ ] Settings are plugin-global: changing them from any key instance affects all instances; key and dial PIs show the same values
-- [ ] Free PI: one account section + "Get Pro" link to the Marketplace listing; no second-account UI
-- [ ] Pro PI: multi-account list (add/remove)
+- [ ] PI: multi-account list (add/remove), with no upgrade UI
 - [ ] Connect buttons trigger the (stub until T4) OAuth flow and reflect connection state
 
 ## Task 4 — OAuth & real calendar providers
@@ -60,10 +58,10 @@ Delivered 2026-07-19: loopback+PKCE OAuth per ADR-0001 (`src/auth/`) with silent
 - [ ] Tokens persist via TokenStore in globalSettings; access-token refresh works silently
 - [ ] Revoking access at the provider → key face shows "Auth" (no crash, no error loop); press restarts OAuth from the key
 - [ ] Fetch failure keeps serving the cached agenda; stale indicator appears after ~30 min of failures
-- [x] Free build: connecting a second account is impossible by construction (single-account code path — `maxAccounts()` is 1 unless `isProUser()`, checked in `connectAccount`; 2026-07-19)
+- [x] Up to eight accounts can be connected and blended by one plugin build.
 - [ ] Privacy policy page live on vo1dee.com; Google verification submitted (release blocker for public listing, not for code review)
 
-## Task 5 — Pro build (dial + multi-account)
+## Task 5 — Agenda dial + multi-account
 
 Delivered 2026-07-19: `buildAgenda`/`dedupeByICalUid` in `src/core/next-meeting.ts` (unit-tested in `src/core/agenda.test.ts`), agenda dial rotate/clamp with 30 s snap-back and `$B1` feedback in `src/actions/agenda-dial.ts`. On-device boxes remain open.
 
@@ -71,14 +69,13 @@ Delivered 2026-07-19: `buildAgenda`/`dedupeByICalUid` in `src/core/next-meeting.
 - [ ] Press and touch-tap join the selected event with the key's exact press semantics
 - [ ] 30s idle → selection snaps back to the Next Meeting; empty Agenda → Clear on the strip
 - [x] Two accounts blended in start order; the same event on both accounts (same iCalUid) appears once (unit-tested: start-order sort + cross-account iCalUid dedupe, 2026-07-19)
-- [ ] Free bundle diff check: free build registers no dial action and contains no dial/multi-account UI
+- [x] The single build registers the dial action and includes multi-account UI.
 
 ## Task 6 — Packaging & Marketplace submission
 
-- [x] `Nodejs.Debug` removed/disabled in both manifests (key dropped entirely, 2026-07-19)
-- [x] `streamdeck validate` and `streamdeck pack` succeed for both SKUs (2026-07-19; `.streamDeckPlugin` outputs are gitignored)
+- [x] `Nodejs.Debug` removed/disabled in the manifest (key dropped entirely, 2026-07-19)
+- [x] `streamdeck validate` and `streamdeck pack` succeed for the plugin (`.streamDeckPlugin` outputs are gitignored)
 - [ ] Placeholder SVGs replaced with final art (including Marketplace-required PNG sizes)
-- [ ] Fresh-machine install test of both `.streamDeckPlugin` files: connect account, see countdown, join a real meeting
-- [ ] Maker org created, Maker Agreement signed, Stripe Connect payout country confirmed (prerequisite for the paid listing — ADR-0003)
-- [ ] Listings: free listing links to Pro; Pro listing does NOT mention auto-mute (deferred past v1.0)
+- [ ] Fresh-machine install test of the `.streamDeckPlugin` file: connect account, see countdown, join a real meeting
+- [ ] Marketplace listing describes all features as free.
 - [ ] Memory/CPU sanity: idle plugin steady-state after 1h — no timer leaks, no unbounded arrays

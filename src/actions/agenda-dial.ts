@@ -14,9 +14,8 @@ import { formatCountdown } from "../core/keyface-state";
 const SNAP_BACK_MS = 30_000;
 
 /**
- * Pro-only Agenda dial: rotate scrolls today's remaining Candidate Events,
+ * Agenda dial: rotate scrolls today's remaining Candidate Events,
  * press/touch joins the selected one, selection snaps back after 30s idle.
- * Only registered when __IS_PRO__ (the free manifest has no Encoder action).
  */
 @action({ UUID: `${__PLUGIN_UUID__}.dial` })
 export class AgendaDial extends SingletonAction {

@@ -14,10 +14,10 @@ export type GlobalSettings = {
   refreshMinutes: number;
   /** Pre-meeting alert: flash the face from T−2m. */
   preMeetingFlash: boolean;
-  /** Pro key gesture mapping: when true, press-and-hold joins and a quick tap
+  /** Key gesture mapping: when true, press-and-hold joins and a quick tap
    * shows the agenda list; when false (default) it's the other way round. */
   holdToJoin: boolean;
-  /** Connected accounts; the free SKU allows exactly one. */
+  /** Connected calendar accounts. */
   accounts: AccountRef[];
   /** OAuth tokens keyed by account id (GlobalSettingsTokenStore backing). */
   tokens: Record<string, TokenSet>;
