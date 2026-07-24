@@ -21,6 +21,9 @@ function fontSize(text: string): number {
   return 42;
 }
 
+/** The "no upcoming meeting" dash reads small on its own; nudge it up. */
+const CLEAR_FONT_SIZE = 60;
+
 const TITLE_FONT_SIZE = 21;
 const TITLE_BASELINE_Y = 31;
 const TITLE_LINE_HEIGHT = 24;
@@ -67,13 +70,13 @@ function titleMarkup(title: string, fg: string): string {
     .join("");
 }
 
-function svg(style: Style, text: string, stale: boolean): string {
+function svg(style: Style, text: string, stale: boolean, overrideFontSize?: number): string {
   const markup =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
     `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
     `<text x="50%" y="53%" text-anchor="middle" dominant-baseline="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
-    `font-size="${fontSize(text)}" fill="${style.fg}">${text}</text>` +
+    `font-size="${overrideFontSize ?? fontSize(text)}" fill="${style.fg}">${text}</text>` +
     (stale ? `<circle cx="${SIZE - 16}" cy="16" r="7" fill="#9aa1ad" opacity="0.8"/>` : "") +
     `</svg>`;
   return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;
@@ -158,7 +161,7 @@ export function renderKeyFace(face: KeyFace, flashPhase = false, stale = false):
     case "now":
       return svgWithMetadata(face.flash && flashPhase ? STYLES.flash : STYLES.imminent, "NOW", face.title, stale);
     case "clear":
-      return svg(STYLES.clear, "—", stale);
+      return svg(STYLES.clear, "—", stale, CLEAR_FONT_SIZE);
     case "auth":
       return svg(STYLES.auth, "Auth", false);
   }
