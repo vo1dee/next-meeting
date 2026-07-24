@@ -10,20 +10,24 @@ type ProviderConfig = {
   authUrl: string;
   tokenUrl: string;
   clientId: string;
-  /** Google issues Desktop-app clients a secret it treats as non-confidential; Microsoft public clients have none. */
+  /** Google issues Desktop-app clients a secret it treats as non-confidential. */
   clientSecret?: string;
   scopes: string[];
   extraAuthParams?: Record<string, string>;
 };
 
-// TODO(release): register the real client — Google Cloud Console "Desktop app"
-// (needs the vo1dee.com privacy policy for sensitive-scope verification).
+function requiredOAuthSetting(name: string): string {
+  const value = process.env[name]?.trim();
+  if (!value) throw new Error(`Missing required OAuth configuration: ${name}`);
+  return value;
+}
+
 export const OAUTH_CONFIG: Record<AccountRef["provider"], ProviderConfig> = {
   google: {
     authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
     tokenUrl: "https://oauth2.googleapis.com/token",
-    clientId: process.env.NM_GOOGLE_CLIENT_ID ?? "REPLACE_ME.apps.googleusercontent.com",
-    clientSecret: process.env.NM_GOOGLE_CLIENT_SECRET ?? "REPLACE_ME",
+    clientId: requiredOAuthSetting("NM_GOOGLE_CLIENT_ID"),
+    clientSecret: requiredOAuthSetting("NM_GOOGLE_CLIENT_SECRET"),
     scopes: ["openid", "email", "https://www.googleapis.com/auth/calendar.readonly"],
     extraAuthParams: { access_type: "offline", prompt: "consent" },
   },

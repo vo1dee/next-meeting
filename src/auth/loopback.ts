@@ -14,8 +14,7 @@ export type Loopback = {
 
 /**
  * Throwaway localhost listener for the OAuth redirect (ADR-0001). Binds to an
- * ephemeral port on 127.0.0.1; both Google (Desktop app) and Microsoft
- * (public client with http://localhost) accept loopback redirects on any port.
+ * ephemeral port on 127.0.0.1, which Google Desktop-app clients support.
  */
 export function startLoopback(): Promise<Loopback> {
   return new Promise((resolveStart, rejectStart) => {

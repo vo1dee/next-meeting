@@ -1,4 +1,4 @@
-/** A calendar event normalized from Google Calendar or Microsoft Graph. */
+/** A calendar event normalized from Google Calendar. */
 export interface CalendarEvent {
   /** Provider-scoped event id. */
   id: string;

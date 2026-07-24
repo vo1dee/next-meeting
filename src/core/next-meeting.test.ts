@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { MockCalendarProvider } from "../calendar/mock-provider";
 import type { CalendarEvent } from "../calendar/provider";
 import { isCandidate, selectNextMeeting } from "./next-meeting";
 
@@ -28,8 +27,31 @@ function event(overrides: Partial<CalendarEvent>): CalendarEvent {
   };
 }
 
-describe("the scenario day (mock provider)", async () => {
-  const events = await new MockCalendarProvider().listDay(at("09:00:00"));
+function scenarioDay(now: Date): CalendarEvent[] {
+  const at = (h: number, m: number): Date => {
+    const date = new Date(now);
+    date.setHours(h, m, 0, 0);
+    return date;
+  };
+  const base = {
+    accountId: "test",
+    isAllDay: false,
+    isCancelled: false,
+    response: "accepted" as const,
+    showAs: "busy" as const,
+    webLink: "https://calendar.example/event",
+  };
+  return [
+    { ...base, id: "1", iCalUid: "u1", title: "Payroll day", start: at(0, 0), end: at(23, 59), isAllDay: true },
+    { ...base, id: "2", iCalUid: "u2", title: "Team sync", start: at(9, 0), end: at(10, 0) },
+    { ...base, id: "3", iCalUid: "u3", title: "Standup", start: at(9, 30), end: at(9, 45), response: "declined" as const },
+    { ...base, id: "4", iCalUid: "u4", title: "1:1 with Sam", start: at(10, 0), end: at(10, 30) },
+    { ...base, id: "5", iCalUid: "u5", title: "Lunch", start: at(12, 0), end: at(13, 0), showAs: "free" as const },
+  ];
+}
+
+describe("the scenario day", () => {
+  const events = scenarioDay(at("09:00:00"));
   const titleAt = (time: string) => selectNextMeeting(events, at(time))?.title;
 
   it("selects the ongoing meeting within its Grace Window, never the all-day event", () => {

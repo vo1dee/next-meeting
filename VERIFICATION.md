@@ -14,7 +14,7 @@ How to use: after each task is delivered, walk its checklist top to bottom. Ever
 
 ## Task 2 — Core plugin logic (mock calendar)
 
-Selection rules — unit tests (node:test) over `MockCalendarProvider`'s scenario day (`npm test`, 21/21 passing 2026-07-19):
+Selection rules — unit tests (node:test) over a deterministic scenario day (`npm test`, 21/21 passing 2026-07-19):
 - [x] At 9:14:59: Next Meeting = "Team sync" (in Grace Window); at 9:15:01: rolls to "1:1 with Sam" — the all-day event, the declined standup, and the Free lunch are never selected
 - [x] Grace Window edges: started+14:59 still selected, started+15:01 not
 - [x] Tentative and needsAction responses qualify; declined and cancelled never do
@@ -51,10 +51,9 @@ Delivered 2026-07-19: sdpi-components v4 is vendored into `ui/` (PI works offlin
 
 ## Task 4 — OAuth & real calendar providers
 
-Delivered 2026-07-19: loopback+PKCE OAuth per ADR-0001 (`src/auth/`) with silent refresh and one 401-retry; Google and Microsoft Graph providers (`src/calendar/`) both mapping to the normalized `CalendarEvent`; tokens persisted in globalSettings via `GlobalSettingsTokenStore`. Only read-only scopes are configured (`calendar.readonly`, `Calendars.Read`); the Microsoft client is public (no secret in the repo — Google's "desktop app" secret is non-confidential by Google's own definition and is env-injected, never committed). **OAuth client registration is external work**: `OAUTH_CONFIG` ships `REPLACE_ME` client IDs with env overrides (`NM_GOOGLE_CLIENT_ID`/`NM_GOOGLE_CLIENT_SECRET`/`NM_MS_CLIENT_ID`); `NEXT_MEETING_MOCK=1` swaps in the mock provider so on-device testing works before clients exist. The unticked boxes below need registered clients plus a machine with Stream Deck.
+Delivered 2026-07-19: loopback+PKCE OAuth per ADR-0001 (`src/auth/`) with silent refresh and one 401-retry; Google Calendar mapping to the normalized `CalendarEvent`; tokens persisted in globalSettings via `GlobalSettingsTokenStore`. The read-only `calendar.readonly` scope is configured. Registered OAuth credentials are provided only by the controlled release environment. The unticked boxes below need a release build and a machine with Stream Deck.
 
 - [ ] Google: loopback+PKCE flow completes from a cold start; only read-only scopes requested (`calendar.readonly`)
-- [ ] Microsoft: same with `Calendars.Read`; public client, no secret anywhere in the repo
 - [ ] Tokens persist via TokenStore in globalSettings; access-token refresh works silently
 - [ ] Revoking access at the provider → key face shows "Auth" (no crash, no error loop); press restarts OAuth from the key
 - [ ] Fetch failure keeps serving the cached agenda; stale indicator appears after ~30 min of failures

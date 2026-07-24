@@ -2,7 +2,7 @@
   "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
   "UUID": "com.vo1dee.next-meeting",
   "Name": "Next Meeting",
-  "Version": "0.1.0.0",
+  "Version": "1.0.0.0",
   "Author": "vo1dee",
   "Description": "Glance at the time until your next meeting and join it with one tap. Blend calendars and scroll today's agenda on a Stream Deck + dial.",
   "URL": "https://vo1dee.com",
