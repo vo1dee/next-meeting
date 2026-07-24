@@ -30,7 +30,7 @@ See how long you have until your next Google Calendar meeting, then join it from
 
 ## Requirements
 
-- Stream Deck application 6.5 or later.
+- Stream Deck application 6.9 or later.
 - macOS 12 or later, or Windows 10 or later.
 - A Stream Deck device. The Agenda Dial action additionally requires a Stream Deck +.
 - A Google account with Google Calendar enabled.

@@ -8,7 +8,7 @@ How to use: after each task is delivered, walk its checklist top to bottom. Ever
 - [x] `npm run build` emits `com.vo1dee.next-meeting.sdPlugin/bin/plugin.js` with a `bin/package.json` marking ESM
 - [x] The manifest validates with `npx @elgato/cli validate com.vo1dee.next-meeting.sdPlugin` (plugin-level Icon/CategoryIcon must be PNG — final art at 256/512 and 28/56 — while action icons stay SVG)
 - [x] The free manifest includes two actions: `com.vo1dee.next-meeting.key` (Keypad) and `com.vo1dee.next-meeting.dial` (Encoder, `$B1` layout, rotate/push/touch descriptions)
-- [x] Manifest: SDKVersion 2, Node 20, Stream Deck ≥ 6.5, mac ≥ 12 + windows ≥ 10, `UserTitleEnabled: false` on the key action (we own the rendered face)
+- [x] Manifest: SDKVersion 3, Node 20, Stream Deck ≥ 6.9, mac ≥ 12 + windows ≥ 10, `UserTitleEnabled: false` on the key action (we own the rendered face)
 - [x] All `Icon`/`Image` paths referenced by the manifests resolve to a file (checked by the CLI validator)
 - [ ] On a machine with Stream Deck installed: `streamdeck link com.vo1dee.next-meeting.sdPlugin` and the plugin appears in the app (smoke only; actions are stubs)
 
