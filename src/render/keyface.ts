@@ -82,6 +82,21 @@ function svg(style: Style, text: string, stale: boolean, overrideFontSize?: numb
   return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;
 }
 
+/** Two centered lines — used for the Auth face so it reads as an instruction, not a status word. */
+function svgTwoLine(style: Style, line1: string, line2: string): string {
+  const markup =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
+    `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
+    `<text x="50%" y="46%" text-anchor="middle" dominant-baseline="middle" ` +
+    `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
+    `font-size="24" fill="${style.fg}">${line1}</text>` +
+    `<text x="50%" y="65%" text-anchor="middle" dominant-baseline="middle" ` +
+    `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="600" ` +
+    `font-size="17" fill="${style.fg}" opacity="0.75">${line2}</text>` +
+    `</svg>`;
+  return `data:image/svg+xml;charset=utf8,${encodeURIComponent(markup)}`;
+}
+
 function svgWithMetadata(style: Style, text: string, title: string, stale: boolean): string {
   const markup =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
@@ -163,6 +178,6 @@ export function renderKeyFace(face: KeyFace, flashPhase = false, stale = false):
     case "clear":
       return svg(STYLES.clear, "—", stale, CLEAR_FONT_SIZE);
     case "auth":
-      return svg(STYLES.auth, "Auth", false);
+      return svgTwoLine(STYLES.auth, "Connect", "calendar");
   }
 }
