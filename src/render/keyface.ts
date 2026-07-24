@@ -87,11 +87,14 @@ function svgPlaceholder(style: Style, line1: string, line2: string, stale: boole
   const markup =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">` +
     `<rect width="${SIZE}" height="${SIZE}" fill="${style.bg}"/>` +
-    `<image x="42.5" y="12" width="59" height="63" href="${ICON_CALENDAR}"/>` +
-    `<text x="50%" y="92" text-anchor="middle" dominant-baseline="middle" ` +
+    `<image x="42.5" y="17" width="59" height="63" href="${ICON_CALENDAR}"/>` +
+    // Baseline y (not dominant-baseline="middle") on purpose: the Stream Deck
+    // app's SVG renderer ignores dominant-baseline and falls back to
+    // alphabetic, which pulled this whole block noticeably above center.
+    `<text x="50%" y="97" text-anchor="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="700" ` +
     `font-size="17" fill="#e8edf7">${line1}</text>` +
-    `<text x="50%" y="112" text-anchor="middle" dominant-baseline="middle" ` +
+    `<text x="50%" y="117" text-anchor="middle" ` +
     `font-family="-apple-system, 'Segoe UI', sans-serif" font-weight="600" ` +
     `font-size="14" fill="#94a1b7">${line2}</text>` +
     (stale ? `<circle cx="${SIZE - 16}" cy="16" r="7" fill="#9aa1ad" opacity="0.8"/>` : "") +
