@@ -19,11 +19,12 @@ export async function getAccounts(): Promise<AccountRef[]> {
   return (await readSettings()).accounts;
 }
 
+export type ConnectResult = { ok: true } | { ok: false; error: string };
+
 /** Interactive loopback+PKCE flow (ADR-0001); persists the account and its tokens. */
-export async function connectAccount(provider: ProviderKind): Promise<boolean> {
+export async function connectAccount(provider: ProviderKind): Promise<ConnectResult> {
   if ((await getAccounts()).length >= maxAccounts()) {
-    streamDeck.logger.info("Account limit reached; connect refused");
-    return false;
+    return { ok: false, error: "Account limit reached." };
   }
   try {
     const result = await runOAuthFlow(provider);
@@ -33,10 +34,11 @@ export async function connectAccount(provider: ProviderKind): Promise<boolean> {
       settings.accounts.push({ id: result.accountId, provider, label: result.label });
       await streamDeck.settings.setGlobalSettings(settings);
     }
-    return true;
+    return { ok: true };
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     streamDeck.logger.error(`Connecting ${provider} failed`, err);
-    return false;
+    return { ok: false, error: message };
   }
 }
 

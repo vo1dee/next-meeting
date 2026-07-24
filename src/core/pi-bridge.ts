@@ -28,11 +28,17 @@ export function connectPiBridge(service: NextMeetingService): void {
       switch (message.event) {
         case "getAccounts":
           break;
-        case "connectAccount":
-          if (message.provider === "google") {
-            if (await connectAccount(message.provider)) await service.refreshNow();
+        case "connectAccount": {
+          if (message.provider !== "google") return;
+          const result = await connectAccount(message.provider);
+          if (result.ok) {
+            await service.refreshNow();
+            break;
           }
-          break;
+          await pushAccounts(service);
+          await streamDeck.ui.current?.sendToPropertyInspector({ event: "connectFailed", message: result.error });
+          return;
+        }
         case "disconnectAccount":
           if (message.accountId) {
             await disconnectAccount(message.accountId);

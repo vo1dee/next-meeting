@@ -17,6 +17,10 @@ export default {
       preventAssignment: true,
       values: {
         __PLUGIN_UUID__: JSON.stringify(uuid),
+        // Empty in local/dev builds; set these two in the release-build shell
+        // to bake real credentials into bin/plugin.js (gitignored — never committed).
+        __GOOGLE_CLIENT_ID__: JSON.stringify(process.env.NM_GOOGLE_CLIENT_ID ?? ""),
+        __GOOGLE_CLIENT_SECRET__: JSON.stringify(process.env.NM_GOOGLE_CLIENT_SECRET ?? ""),
       },
     }),
     typescript(),

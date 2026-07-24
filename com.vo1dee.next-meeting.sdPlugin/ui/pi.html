@@ -257,6 +257,9 @@
       client.sendToPropertyInspector.subscribe((message) => {
         const payload = message?.payload ?? message;
         if (payload?.event === "accounts") renderAccounts(payload);
+        if (payload?.event === "connectFailed") {
+          $("account-hint").textContent = payload.message ? `Connect failed: ${payload.message}` : "Connect failed.";
+        }
       });
 
       $("connect-google").addEventListener("click", () =>

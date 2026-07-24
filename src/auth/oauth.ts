@@ -16,22 +16,42 @@ type ProviderConfig = {
   extraAuthParams?: Record<string, string>;
 };
 
-function requiredOAuthSetting(name: string): string {
-  const value = process.env[name]?.trim();
-  if (!value) throw new Error(`Missing required OAuth configuration: ${name}`);
+/**
+ * Prefers the value rollup baked in at build time (release builds); falls
+ * back to the runtime env var for local/dev builds, where the baked-in
+ * constant is "" (see build-flags.d.ts).
+ */
+function oauthSetting(baked: string, envName: string): string {
+  const value = baked || process.env[envName]?.trim();
+  if (!value) throw new Error(`Missing required OAuth configuration: ${envName}`);
   return value;
 }
 
-export const OAUTH_CONFIG: Record<AccountRef["provider"], ProviderConfig> = {
+type StaticProviderConfig = Omit<ProviderConfig, "clientId" | "clientSecret">;
+
+const STATIC_PROVIDER_CONFIG: Record<AccountRef["provider"], StaticProviderConfig> = {
   google: {
     authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
     tokenUrl: "https://oauth2.googleapis.com/token",
-    clientId: requiredOAuthSetting("NM_GOOGLE_CLIENT_ID"),
-    clientSecret: requiredOAuthSetting("NM_GOOGLE_CLIENT_SECRET"),
     scopes: ["openid", "email", "https://www.googleapis.com/auth/calendar.readonly"],
     extraAuthParams: { access_type: "offline", prompt: "consent" },
   },
 };
+
+/**
+ * Reads client credentials lazily, on first OAuth use, rather than at module
+ * load. Reading them eagerly would throw as soon as anything imports this
+ * module — crashing the whole plugin process on machines where the release
+ * environment hasn't injected NM_GOOGLE_CLIENT_ID/SECRET, instead of just
+ * failing the Connect action with a clear error.
+ */
+function getOAuthConfig(provider: AccountRef["provider"]): ProviderConfig {
+  return {
+    ...STATIC_PROVIDER_CONFIG[provider],
+    clientId: oauthSetting(__GOOGLE_CLIENT_ID__, "NM_GOOGLE_CLIENT_ID"),
+    clientSecret: oauthSetting(__GOOGLE_CLIENT_SECRET__, "NM_GOOGLE_CLIENT_SECRET"),
+  };
+}
 
 type TokenResponse = {
   access_token: string;
@@ -75,7 +95,7 @@ export type OAuthResult = { accountId: string; label: string; tokens: TokenSet }
 
 /** Full interactive loopback+PKCE flow (ADR-0001): browser consent → code → tokens. */
 export async function runOAuthFlow(provider: AccountRef["provider"]): Promise<OAuthResult> {
-  const config = OAUTH_CONFIG[provider];
+  const config = getOAuthConfig(provider);
   const { redirectUri, waitForCode, close } = await startLoopback();
   try {
     const { verifier, challenge, state } = createPkce();
@@ -121,9 +141,9 @@ export class OAuthManager {
   constructor(private readonly store: TokenStore) {}
 
   private async refresh(account: AccountRef, tokens: TokenSet): Promise<TokenSet> {
-    const config = OAUTH_CONFIG[account.provider];
     let json: TokenResponse;
     try {
+      const config = getOAuthConfig(account.provider);
       json = await postForm(config.tokenUrl, {
         grant_type: "refresh_token",
         refresh_token: tokens.refreshToken,
