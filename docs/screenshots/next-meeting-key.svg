@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144" role="img" aria-labelledby="title description">
+  <title id="title">Next Meeting key preview</title>
+  <desc id="description">A green Stream Deck key showing Design review and a 25 minute countdown.</desc>
+  <rect width="144" height="144" fill="#1f7d3a"/>
+  <text x="8" y="31" fill="#ffffff" font-family="-apple-system, Segoe UI, sans-serif" font-size="21" font-weight="600" opacity=".95">Design</text>
+  <text x="8" y="55" fill="#ffffff" font-family="-apple-system, Segoe UI, sans-serif" font-size="21" font-weight="600" opacity=".95">review</text>
+  <text x="130" y="125" text-anchor="end" dominant-baseline="middle" fill="#ffffff" font-family="-apple-system, Segoe UI, sans-serif" font-size="42" font-weight="700">25m</text>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144" role="img" aria-labelledby="title description">
+  <title id="title">Next Meeting agenda preview</title>
+  <desc id="description">A green Stream Deck key showing two upcoming meetings in the agenda view.</desc>
+  <rect width="144" height="144" fill="#1f7d3a"/>
+  <text x="8" y="14" fill="#ffffff" font-family="-apple-system, Segoe UI, sans-serif" font-size="10" font-weight="700" letter-spacing="1" opacity=".7">AGENDA</text>
+  <text x="8" y="36" fill="#ffffff" font-family="-apple-system, Segoe UI, sans-serif" font-size="12" font-weight="600" opacity=".7">10:00</text>
+  <text x="8" y="56" fill="#ffffff" font-family="-apple-system, Segoe UI, sans-serif" font-size="17" font-weight="700">Design review</text>
+  <text x="8" y="96" fill="#ffffff" font-family="-apple-system, Segoe UI, sans-serif" font-size="12" font-weight="600" opacity=".7">11:30</text>
+  <text x="8" y="116" fill="#ffffff" font-family="-apple-system, Segoe UI, sans-serif" font-size="17" font-weight="700">Team sync</text>
+</svg>
