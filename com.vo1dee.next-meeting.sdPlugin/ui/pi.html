@@ -181,9 +181,11 @@
 
     <div class="nm-section">
       <div class="nm-section__title">Preferences</div>
+      <!-- Refresh interval is fixed at 1 minute (DEFAULT_SETTINGS.refreshMinutes); slider disabled.
       <sdpi-item label="Refresh every (min)">
-        <sdpi-range setting="refreshMinutes" global min="1" max="15" step="1" default="5" showlabels></sdpi-range>
+        <sdpi-range setting="refreshMinutes" global min="1" max="15" step="1" default="1" showlabels></sdpi-range>
       </sdpi-item>
+      -->
       <sdpi-item label="Pre-meeting alert">
         <sdpi-checkbox setting="preMeetingFlash" global label="Flash from 2 minutes before"></sdpi-checkbox>
       </sdpi-item>
