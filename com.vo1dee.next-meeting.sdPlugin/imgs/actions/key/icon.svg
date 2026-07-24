@@ -1,7 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
-  <!-- Placeholder asset: replace with final art before Marketplace submission (T6). -->
-  <rect x="10" y="14" width="52" height="46" rx="8" fill="#1a1f2b" stroke="#4f8cff" stroke-width="3"/>
-  <path d="M10 22a8 8 0 0 1 8-8h36a8 8 0 0 1 8 8v6H10z" fill="#4f8cff"/>
-  <circle cx="36" cy="44" r="11" fill="none" stroke="#e8edf7" stroke-width="3"/>
-  <path d="M36 37v7l5 3" stroke="#e8edf7" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="38" fill="none" stroke="#FFFFFF" stroke-width="8"/>
+  <line x1="50" y1="50" x2="50" y2="26" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+  <line x1="50" y1="50" x2="70" y2="50" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="50" cy="50" r="4.5" fill="#FFFFFF"/>
 </svg>

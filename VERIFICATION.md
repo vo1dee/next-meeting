@@ -6,7 +6,7 @@ How to use: after each task is delivered, walk its checklist top to bottom. Ever
 
 - [x] `npm install` completes, then `npm run typecheck` exits 0
 - [x] `npm run build` emits `com.vo1dee.next-meeting.sdPlugin/bin/plugin.js` with a `bin/package.json` marking ESM
-- [x] The manifest validates with `npx @elgato/cli validate com.vo1dee.next-meeting.sdPlugin` (plugin-level Icon/CategoryIcon must be PNG, so those placeholders are PNGs while action icons stay SVG)
+- [x] The manifest validates with `npx @elgato/cli validate com.vo1dee.next-meeting.sdPlugin` (plugin-level Icon/CategoryIcon must be PNG — final art at 256/512 and 28/56 — while action icons stay SVG)
 - [x] The free manifest includes two actions: `com.vo1dee.next-meeting.key` (Keypad) and `com.vo1dee.next-meeting.dial` (Encoder, `$B1` layout, rotate/push/touch descriptions)
 - [x] Manifest: SDKVersion 2, Node 20, Stream Deck ≥ 6.5, mac ≥ 12 + windows ≥ 10, `UserTitleEnabled: false` on the key action (we own the rendered face)
 - [x] All `Icon`/`Image` paths referenced by the manifests resolve to a file (checked by the CLI validator)
@@ -74,7 +74,7 @@ Delivered 2026-07-19: `buildAgenda`/`dedupeByICalUid` in `src/core/next-meeting.
 
 - [x] `Nodejs.Debug` removed/disabled in the manifest (key dropped entirely, 2026-07-19)
 - [x] `streamdeck validate` and `streamdeck pack` succeed for the plugin (`.streamDeckPlugin` outputs are gitignored)
-- [ ] Placeholder SVGs replaced with final art (including Marketplace-required PNG sizes)
+- [x] Placeholder SVGs replaced with final art (including Marketplace-required PNG sizes; 2026-07-24, from the "Next Meeting Assets" Claude design doc)
 - [ ] Fresh-machine install test of the `.streamDeckPlugin` file: connect account, see countdown, join a real meeting
 - [ ] Marketplace listing describes all features as free.
 - [ ] Memory/CPU sanity: idle plugin steady-state after 1h — no timer leaks, no unbounded arrays
