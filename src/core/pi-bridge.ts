@@ -6,7 +6,7 @@ import type { NextMeetingService } from "./service";
 type PiMessage = { event?: string; provider?: string; accountId?: string };
 
 async function pushAccounts(service: NextMeetingService): Promise<void> {
-  await streamDeck.ui.current?.sendToPropertyInspector({
+  await streamDeck.ui.sendToPropertyInspector({
     event: "accounts",
     accounts: await getAccounts(),
     maxAccounts: maxAccounts(),
@@ -36,7 +36,7 @@ export function connectPiBridge(service: NextMeetingService): void {
             break;
           }
           await pushAccounts(service);
-          await streamDeck.ui.current?.sendToPropertyInspector({ event: "connectFailed", message: result.error });
+          await streamDeck.ui.sendToPropertyInspector({ event: "connectFailed", message: result.error });
           return;
         }
         case "disconnectAccount":
